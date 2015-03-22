@@ -45,9 +45,14 @@ Scene {
     Player {
       id: player
       x: 20
-      y: 20
+      y: 160
     }
 
+    Hotspot {
+      id: glass
+      x: 310
+      y: 160
+    }
   }
 /*
   Timer {
