@@ -28,12 +28,12 @@ Scene {
     width: level.width
     anchors.bottom: gameScene.gameWindowAnchorItem.bottom
     anchors.left: gameScene.gameWindowAnchorItem.left
-    x: player.x > offsetBeforeScrollingStarts ? offsetBeforeScrollingStarts - player.x : 0
+    x: firstPlayer.x > offsetBeforeScrollingStarts ? offsetBeforeScrollingStarts - firstPlayer.x : 0
 
     PhysicsWorld {
       id: physicsWorld
       gravity: Qt.point(0,-25)
-      debugDrawVisible: false // enable this for physics debugging
+      debugDrawVisible: true // enable this for physics debugging
       z: 1000
     }
 
@@ -43,9 +43,11 @@ Scene {
     }
 
     Player {
-      id: player
-      x: 20
+      id: firstPlayer      
+      x: 50
       y: 160
+      //x: 0
+      //y: 0
     }
 
     Hotspot {
@@ -54,24 +56,5 @@ Scene {
       y: 160
     }
   }
-/*
-  Timer {
-    id: updateTimer
-    // set this interval as high as possible to improve performance, but as low as needed so it still looks good
-    interval: 60
-    running: true
-    repeat: true
-    onTriggered: {
-      var xAxis = controller.xAxis;
-      // if the xAxis has a value != 0, we move the player, else we slow him down until he stops
-      if(xAxis) {
-        player.horizontalVelocity = xAxis*200;
-      } else {
-        if(Math.abs(player.horizontalVelocity) > 10) player.horizontalVelocity /= 1.5
-        else player.horizontalVelocity = 0
-      }
-    }
-  }
-  */
 }
 
