@@ -19,8 +19,8 @@ Levels.LevelBase {
 
     MouseArea {
         anchors.fill: level
-        onClicked: {
-            firstPlayer.move(mouse.x, mouse.y)
+        onClicked: {            
+            firstPlayer.move(mouseX, mouseY)
         }
     }
 
@@ -47,10 +47,10 @@ Levels.LevelBase {
     Wall {
         id: rightWall
         vertices: [
-            Qt.point(1135, 300), // top left
+            Qt.point(1135, 200), // top left
             Qt.point(1135, 365), // bottom left
             Qt.point(840, 360), // bottom right
-            Qt.point(840, 300) // top right
+            Qt.point(840, 200) // top right
         ]
     }
 

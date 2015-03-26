@@ -32,7 +32,7 @@ Scene {
 
     PhysicsWorld {
       id: physicsWorld
-      gravity: Qt.point(0,-25)
+      gravity: Qt.point(0,0)
       debugDrawVisible: true // enable this for physics debugging
       z: 1000
     }
@@ -44,8 +44,8 @@ Scene {
 
     Player {
       id: firstPlayer      
-      x: 50
-      y: 160
+      x: 200
+      y: 120
       //x: 0
       //y: 0
     }
@@ -54,6 +54,14 @@ Scene {
       id: glass
       x: 310
       y: 160
+    }
+
+    Rectangle {
+        height: 5
+        width: 5
+        x: 200
+        y: 155
+        color: "red"
     }
   }
 }
