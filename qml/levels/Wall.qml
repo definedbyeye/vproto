@@ -14,8 +14,6 @@ PolygonCollider {
 
     fixture.onBeginContact: {
         console.log('wall collideded with player!!')
-
-        //moveTo.stop()
     }
 }
 

@@ -7,21 +7,33 @@ EntityBase {
     width: 57
     height: 192
 
-    //origin at 0,0
-    property string direction: "none"
+    property string direction: ""
+    property int speed: 150
 
     function isTargetReached() {
         var pX = player.x + player.width/2
         var pY = player.y + player.height - 5
         var toX = moveToPointHelper.targetPoint.x
         var toY = moveToPointHelper.targetPoint.y
-        console.log('x: ' + pX + ' to ' + toX)
-        console.log('y: ' + pY + ' to ' + toY)
-        //if(playerX > toX && playerY > toY) {playerCollider.linearVelocity = Qt.point(0,0)}
+
         if((player.direction == "NW" && pX <= toX && pY <= toY)
          || (player.direction == "NE" && pX > toX && pY <= toY)
          || (player.direction == "SE" && pX > toX && pY > toY)
          || (player.direction == "SW" && pX <= toX && pY > toY)) {
+            playerCollider.linearVelocity = Qt.point(0,0)
+        }
+    }
+
+    function isTargetCloseEnough() {
+        var pX = player.x + player.width/2
+        var pY = player.y + player.height - 5
+        var toX = moveToPointHelper.targetPoint.x
+        var toY = moveToPointHelper.targetPoint.y
+
+        if((player.direction[0] == "N" && pY <= toY)
+         || (player.direction[0] == "S" && pY < toY)
+         || (player.direction[1] == "E" && pX > toX)
+         || (player.direction[1] == "W" && pX <= toX)) {
             playerCollider.linearVelocity = Qt.point(0,0)
         }
     }
@@ -37,26 +49,17 @@ EntityBase {
         source: "../../assets/player/player.png"
     }
 
-    function gcd(a,b) { return (!b)?a:gcd(b,a%b); }
-
-
     signal move(real toX, real toY)
     onMove: {
         var fromX = player.x + player.width/2
         var fromY = player.y + player.height - 5
-
-        //console.log(fromX + ', ' + fromY + ' to ' + toX + ', ' + toY + ' = ' + toX-fromX + ', ' + toY-fromY)
-        console.log((toX-fromX) + ', ' + (toY-fromY))
+        var diffX = toX - fromX
+        var diffY = toY - fromY
+        var speed = Math.abs(player.speed/Math.sqrt((diffX*diffX) + (diffY*diffY)))
 
         moveToPointHelper.targetPoint = Qt.point(toX, toY)
         playerCollider.linearVelocity = Qt.point(0,0)
-        var diffX = Math.floor(toX - fromX)
-        var diffY = Math.floor(toY - fromY)
-        var divBy = Math.abs(diffX - diffY)
-        //console.log('div: ' + divBy)
-
-        //closer, but not quite right - need a more consistent speed
-        playerCollider.linearVelocity = Qt.point((diffX/divBy)*100, (diffY/divBy))
+        playerCollider.linearVelocity = Qt.point(diffX*speed, diffY*speed)
 
         if(playerCollider.linearVelocity.x <= 0 && playerCollider.linearVelocity.y <= 0) {player.direction = "NW"}
         else if(playerCollider.linearVelocity.x > 0 && playerCollider.linearVelocity.y <= 0) {player.direction = "NE"}
@@ -66,9 +69,6 @@ EntityBase {
 
     MoveToPointHelper {
         id: moveToPointHelper
-        // the targetPoint gets set from MouseArea
-        onTargetReached: {console.log('target reached'); playerCollider.linearVelocity = Qt.point(0,0);}
-        //stopForwardMovementAtDifferentDirections: true
     }
 
     BoxCollider {
@@ -81,23 +81,14 @@ EntityBase {
 
         bodyType: Body.Dynamic
 
-        //anchors.fill: parent
-
         //categories: Box.Category2
         //collidesWith: Box.Category1 //walls
 
-        collisionTestingOnlyMode: false // use Box2D only for collision detection, move the entity with the NumberAnimation above
+        collisionTestingOnlyMode: false
         //sensor : true
         fixture.onBeginContact: {
-            console.log('player collided with a wall!');
-            //moveToPointHelper.targetPoint = Qt.point(playerCollider.body.x, playerCollider.body.y)
             playerCollider.linearVelocity = Qt.point(0,0)
-            //moveTo.stop()
         }
-
-        // rotate left and right
-        //torque: moveToPointHelper.outputXAxis*300
-
     }// BoxCollider
 
     /*

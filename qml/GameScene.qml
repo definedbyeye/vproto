@@ -24,8 +24,8 @@ Scene {
   // this is the moving item containing the level and player
   Item {
     id: viewPort
-    height: level.height
-    width: level.width
+    height: level1.height
+    width: level1.width
     anchors.bottom: gameScene.gameWindowAnchorItem.bottom
     anchors.left: gameScene.gameWindowAnchorItem.left
     x: firstPlayer.x > offsetBeforeScrollingStarts ? offsetBeforeScrollingStarts - firstPlayer.x : 0
@@ -39,30 +39,25 @@ Scene {
 
     // you could load your levels Dynamically with a Loader component here
     Level1 {
-      id: level
-    }
+      id: level1
+      //x: -(level1.width - gameScene.width)
 
-    Player {
-      id: firstPlayer      
-      x: 200
-      y: 120
-      //x: 0
-      //y: 0
-    }
-
-    Hotspot {
-      id: glass
-      x: 310
-      y: 160
-    }
-
-    Rectangle {
-        height: 5
-        width: 5
+      Player {
+        id: firstPlayer
         x: 200
-        y: 155
-        color: "red"
+        y: 120
+        //x: 0
+        //y: 0
+      }
+
+      Hotspot {
+        id: glass
+        x: 310
+        y: 160
+      }
+
     }
+
   }
 }
 
