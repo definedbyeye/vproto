@@ -75,18 +75,12 @@ EntityBase {
 
     MouseArea {
         anchors.fill: hotspot
-        onPressed: {console.log('hotspot pressed');}
         onReleased: {
-            console.log('hotpspot released: ' + mouseX + ', ' + mouseY);
-            console.log('hotpspot released: ' + mouse.x + ', ' + mouse.y);
-            if(Math.abs(mouseX) > 20 || Math.abs(mouseY) > 20){
-                if(Math.abs(mouseY) > Math.abs(mouseX)) {
-                    mouseY > 0 ? hotspot.swipeDown() : hotspot.swipeUp()
-                } else {
-                    mouseX > 0 ? hotspot.swipeRight() : hotspot.swipeLeft()
-                }
-            }
-
+            triggerSwipe(hotspot, mouse)
+        }
+        onDoubleClicked: {
+            inventory.addInventory(1)
         }
     }
+
 }

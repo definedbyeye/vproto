@@ -85,7 +85,7 @@ EntityBase {
         //collidesWith: Box.Category1 //walls
 
         collisionTestingOnlyMode: false
-        //sensor : true
+
         fixture.onBeginContact: {
             playerCollider.linearVelocity = Qt.point(0,0)
         }
