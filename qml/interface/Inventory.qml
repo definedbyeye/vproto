@@ -10,7 +10,7 @@ Rectangle {
         var invItem = storage.getInventory(id);
         if(invItem) {
             inventoryManager.createEntityFromUrlWithProperties(
-                        Qt.resolvedUrl("../entities/InventoryItem.qml"), invItem)
+                        Qt.resolvedUrl("InventoryItem.qml"), invItem)
         }
     }
     color: "#cccccc"
@@ -31,7 +31,7 @@ Rectangle {
         onClicked: {
             console.log('clicked');
             inventoryManager.createEntityFromUrlWithProperties(
-                        Qt.resolvedUrl("../entities/InventoryItem.qml"),
+                        Qt.resolvedUrl("InventoryItem.qml"),
                         {"color": "green", "entityId": "i"+count, "text": count, "width": "50"}
                         )
             count++

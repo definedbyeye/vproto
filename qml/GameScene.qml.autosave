@@ -12,12 +12,6 @@ Scene {
 
   property int offsetBeforeScrollingStarts: 0
 
-  EntityManager {
-    id: entityManager
-
-    dynamicCreationEntityList: []
-  }
-
   // the whole screen is filled with an incredibly beautiful blue ...
   Rectangle {
     anchors.fill: gameScene.gameWindowAnchorItem
@@ -79,15 +73,19 @@ Scene {
     }
 
     // you could load your rooms Dynamically with a Loader component here
+    Loader {
+        
+    }
+    
     Room1 {
       id: room1
     }    
 
     Player {
       id: firstPlayer
-      x: 200
-      y: 120
-    }
+      x: storage.playerX
+      y: storage.playerY
+    }        
   }
 }
 

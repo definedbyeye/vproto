@@ -1,16 +1,28 @@
 import VPlay 2.0
 import QtQuick 2.0
 import "../entities"
-import "." as Levels
+import "." as Rooms
 
-Levels.LevelBase {
-    id: level
+Rooms.RoomBase {
+    id: room1
 
     height: 360
     width: 1140
 
+    Component.onCompleted: {
+        //load hotspots
+
+    }
+
     MultiResolutionImage {
         source: "../../assets/background/bg_testing_tables.png"
+    }
+
+    Loader {
+        id: glass
+        x: 310
+        y: 160
+        source: "../entities/Hotspot1.qml"
     }
 
     Wall {

@@ -9,7 +9,7 @@ Rectangle {
 
     property int id: 0
     property string name: ""
-    property string description: ""
+    property string description: ""    
 
     Text {
         text: parent.name

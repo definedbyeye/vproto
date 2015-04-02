@@ -10,64 +10,20 @@ GameWindow {
   width: 960
   height: 640
 
+  Root.Data {
+      id: storage
+      Component.onCompleted: {storage.newGame();}
+  }
+  
   activeScene: gameScene
   GameScene {
     id: gameScene
-
-    Root.Data {
-        id: storage
-        Component.onCompleted: init()
-    }
   }
 
-  /*
-    // this property holds how often the game was started
-    property int numberGameStarts
+  EntityManager {
+    id: entityManager
 
-    Component.onCompleted: {
-
-      // this code reads the numberGameStarts value from the database
-
-      // getValue() returns undefined, if no setting for this key is found, so when this is the first start of the app
-      var tempNumberGameStarts = settings.getValue("numberGameStarts")
-      if(!tempNumberGameStarts) {
-          settings.setValue("numberGameStarts", 0)
-          tempNumberGameStarts = 0
-      }
-
-      numberGameStarts = tempNumberGameStarts
-    }
-*/
-  /*
-
-  Storage {
-      id: inventoryLookup
-
-      Component.onCompleted: {
-          inventoryLookup.setValue(1, {id: 1, name: "Water Glass", description: "An empty glass"})
-      }
-  }
-  */
-
-  function triggerSwipe (target, mouse) {
-      var tw = target.width/2
-      var th = target.height/2
-      var x = mouse.x - tw;
-      var y = - (mouse.y  - th);
-
-      if(Math.abs(y) > Math.abs(x) && Math.abs(y) > (th+1)) {
-          if(y > 0) {
-              target.swipeUp()
-          } else {
-              target.swipeDown()
-          }
-      } else if(Math.abs(x) > Math.abs(y) && Math.abs(x) > (tw+1)) {
-          if(x > 0) {
-              target.swipeRight()
-          } else {
-              target.swipeLeft()
-          }
-      }
+    dynamicCreationEntityList: []
   }
 
 }

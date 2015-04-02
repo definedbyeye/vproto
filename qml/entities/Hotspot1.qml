@@ -1,26 +1,21 @@
 import VPlay 2.0
 import QtQuick 2.4
+import "." as Hotspots
 
-EntityBase {
-    id: hotspot
-    entityType: "hotspot"
+Hotspots.HotspotBase {
+
+    hotspotId: 1
+    inventoryId: 1
 
     width: 41
     height: 59
-
-    signal swipeUp()
-    signal swipeDown()
-    signal swipeLeft()
-    signal swipeRight()
 
     onSwipeUp: {sprite.jumpTo("empty")}
     onSwipeDown: {if(sprite.spriteSequence.currentSprite !== "boil" && sprite.spriteSequence.currentSprite !== "freeze") sprite.jumpTo("full")}
     onSwipeRight: {if(sprite.spriteSequence.currentSprite !== "empty") sprite.jumpTo("boil")}
     onSwipeLeft: {if(sprite.spriteSequence.currentSprite !== "empty") sprite.jumpTo("freeze")}
 
-    //MultiResolutionImage {
-    //source: "../../assets/hotspot/sprite_glass.png"
-    //}
+    onDoubleClicked: inventory.addInventory(1)
 
     SpriteSequenceVPlay {
         id: sprite
@@ -71,16 +66,6 @@ EntityBase {
             to: {"freeze":1}
         }
 
-    }
-
-    MouseArea {
-        anchors.fill: hotspot
-        onReleased: {
-            triggerSwipe(hotspot, mouse)
-        }
-        onDoubleClicked: {
-            inventory.addInventory(1)
-        }
     }
 
 }
