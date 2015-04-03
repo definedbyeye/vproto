@@ -9,17 +9,17 @@ Item {
     property int quickSaveId: 1
     property bool dbInit: false
 
-    property string playerId: "firstPlayer"
-    property string roomId: "room1"
-    property int playerX: 200
-    property int playerY: 120
+    property string playerId: ""
+    property string roomId: ""
+    property int playerX: 0
+    property int playerY: 0
 
     //opens db and ensures all tables are created
-    function openDb() {                
+    function openDb() {
         var db = LocalStorage.openDatabaseSync("ProtoStorage", "1.0", "Proto Game Storage", 1000000);
         if(!dbInit) {
             createTables(db);
-            newGame();
+            newGame(db);
         }
         return db;
     }
@@ -33,15 +33,28 @@ Item {
         });
     }
 
-    function savePlayerState() {
-        var db = openDb();
+    function savePlayerState(db) {
+        db = db || openDb();
         db.transaction(function(tx) {
            tx.executeSql('UPDATE SaveStates SET playerId = "'+playerId+'", roomId = "'+roomId+'", x = '+playerX+', y = '+playerY+' WHERE ROWID = '+quickSaveId);
         });
     }
 
-    function saveState (entity, id, state) {
-        var db = openDb();
+    function loadPlayerState(db) {
+        db = db || openDb();
+        db.transaction(function(tx) {
+            var result = tx.executeSql('SELECT * FROM SaveStates WHERE ROWID = ' + quickSaveId);
+            if(result.rows.length) {
+                roomId = result.rows(0).roomId;
+                playerId = result.rows(0).playerId;
+                playerX = result.rows(0).playerX;
+                playerY = result.rows(0).playerY;
+            }
+        });
+    }
+
+    function saveState (entity, id, state, db) {
+        db = db || openDb();
         var tableName = entity.charAt(0).toUpperCase() + entity.slice(1) + 'States';
         db.transaction(function(tx) {            
             var result = tx.executeSql('SELECT * FROM '+tableName+' WHERE saveId = '+quickSaveId+' AND '+entity+'Id = '+id);
@@ -53,8 +66,8 @@ Item {
         });
     }
 
-    function loadState (entity, id, state) {
-        var db = openDb();
+    function loadState (entity, id, state, db) {
+        db = db || openDb();
         var tableName = entity.charAt(0).toUpperCase() + entity.slice(1) + 'States';
         db.transaction(function(tx) {
             var result = tx.executeSql('SELECT * FROM '+tableName+' WHERE saveId = '+quickSaveId+' AND '+entity+'Id = '+id);            
@@ -67,14 +80,19 @@ Item {
 
     //newGame resets quickSave
     //TODO: warning that all progress will be lost
-    function newGame() {    
-        var db = openDb();
+    function newGame(db) {
+        db = db || openDb();
         var now = new Date('now');
 
-        deleteSave(quickSaveId);
+        deleteSave(quickSaveId, db);
+
+        roomId = 'room1';
+        playerId = 'mainPlayer';
+        playerX = 200;
+        playerY = 120;
 
         db.transaction(function(tx) {
-            tx.executeSql('REPLACE INTO SaveStates (ROWID, name, playerId, roomId, x, y, created, updated) VALUES (?,?,?,?,?,?,?,?)', [
+            tx.executeSql('INSERT INTO SaveStates (ROWID, name, playerId, roomId, x, y, created, updated) VALUES (?,?,?,?,?,?,?,?)', [
                               quickSaveId,
                               "Quick Save",
                               playerId,
@@ -87,23 +105,29 @@ Item {
         });
     }
 
+    function continueGame(db) {
+        db = db || openDb()
+    }
+
     //loadGame loads a copy into the quickSave
     //TODO: warning that all progress will be lost
-    function loadGame(id) {        
+    function loadGame(id, db) {
+        db = db || openDb()
         if(id !== quickSaveId) {
-            deleteSave(quickSaveId);
-            copySaveStates(id, quickSaveId);
+            deleteSave(quickSaveId, db);
+            copySaveStates(id, quickSaveId, db);
+            loadPlayerState(quickSaveId, db);
         }
     }
 
     //saveGame makes a copy out of the quickSave
-    function saveGame(id) {        
+    function saveGame(id, db) {
         id = id || 0;
-        copySaveStates(quickSaveId, id)
+        copySaveStates(quickSaveId, id, db)
     }
 
-    function deleteSave(saveId) {
-        var db = openDb();
+    function deleteSave(saveId, db) {
+        db = db || openDb();
         db.transaction(function(tx) {
             tx.executeSql('DELETE FROM SaveStates WHERE ROWID = ' + saveId);
             tx.executeSql('DELETE FROM HotspotStates WHERE saveId = ' + saveId);
@@ -112,8 +136,8 @@ Item {
         });
     }
 
-    function copySaveStates(fromId, toId) {
-        var db = openDb();
+    function copySaveStates(fromId, toId, db) {
+        db = db || openDb();
         var result, i, qry;
 
         db.transaction(function(tx) {

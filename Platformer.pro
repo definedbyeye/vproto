@@ -37,5 +37,6 @@ ios {
 DISTFILES += \
     Hotspot.qml \
     qml/StorageBase.qml \
-    qml/interface/Save.qml
+    qml/interface/Save.qml \
+    qml/interface/InventoryPanel.qml
 

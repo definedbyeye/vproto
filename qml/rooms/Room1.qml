@@ -1,17 +1,20 @@
 import VPlay 2.0
 import QtQuick 2.0
 import "../entities"
-import "." as Rooms
+import "../common"
 
-Rooms.RoomBase {
+RoomBase {
     id: room1
 
     height: 360
     width: 1140
 
+    //state machine this so player can enter from multiple points
+    defaultPlayerX: 200
+    defaultPlayerY: 120
+
     Component.onCompleted: {
         //load hotspots
-
     }
 
     MultiResolutionImage {

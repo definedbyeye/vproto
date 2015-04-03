@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.1
 import QtQuick.Controls 1.3
 
 Rectangle {
-    id: inventory
+    id: inventoryPanel
 
     function addInventory(id) {
         var invItem = storage.getInventory(id);
@@ -26,7 +26,7 @@ Rectangle {
 
     Button {
         property int count: 1;
-        anchors.right: inventory.right
+        anchors.right: inventoryPanel.right
         text: "Add Inventory"
         onClicked: {
             console.log('clicked');
@@ -39,8 +39,8 @@ Rectangle {
         z: 2000
     }
 
-    PropertyAnimation { id: showPanel; target: inventory; property: "y"; to: 50; duration: 700; easing.type: Easing.InOutCubic; }
-    PropertyAnimation { id: hidePanel; target: inventory; property: "y"; to: 0-height; duration: 1500; easing.type: Easing.OutBack; }
+    PropertyAnimation { id: showPanel; target: inventoryPanel; property: "y"; to: 50; duration: 700; easing.type: Easing.InOutCubic; }
+    PropertyAnimation { id: hidePanel; target: inventoryPanel; property: "y"; to: 0-height; duration: 1500; easing.type: Easing.OutBack; }
 
     property bool show: false
 
@@ -55,7 +55,7 @@ Rectangle {
     }
 
     MouseArea {
-        anchors.fill: inventory
+        anchors.fill: inventoryPanel
 
         property point pressed: Qt.point(0,0)
 

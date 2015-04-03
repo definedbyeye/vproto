@@ -1,6 +1,7 @@
 import VPlay 2.0
 import QtQuick 2.0
-import "." as Root
+import "common"
+import "scenes"
 
 GameWindow {
   id: gameWindow
@@ -10,21 +11,80 @@ GameWindow {
   width: 960
   height: 640
 
-  Root.Data {
+
+  Data {
       id: storage
       Component.onCompleted: {storage.newGame();}
-  }
-  
-  activeScene: gameScene
-  GameScene {
-    id: gameScene
   }
 
   EntityManager {
     id: entityManager
-
+    entityContainer: gameScene
     dynamicCreationEntityList: []
+  }  
+
+  state: "menu"
+  activeScene: menuScene
+
+  MenuScene {
+    id: menuScene
+
+    onNewGamePressed: {
+        storage.newGame();
+        gameWindow.state = "game";
+        gameScene.load();
+    }
+    onContinueGamePressed: {
+        //should continue the game with the most recent timestamp
+        storage.loadGame();
+        gameWindow.state = "game"
+        gameScene.load();
+    }
+
+
+    onBackButtonPressed: {
+      nativeUtils.displayMessageBox(qsTr("Really quit the game?"), "", 2);
+    }
+
+    // listen to the return value of the MessageBox
+    Connections {
+      target: nativeUtils
+      onMessageBoxFinished: {
+        // only quit, if the activeScene is menuScene - the messageBox might also get opened from other scenes in your code
+        if(accepted && window.activeScene === menuScene)
+          Qt.quit()
+      }
+    }
   }
+
+  GameScene {
+    id: gameScene
+    anchors.bottom: parent.bottom
+    anchors.left: parent.left
+  }
+
+  CreditsScene {
+    id: creditsScene
+  }
+
+  // state machine, takes care reversing the PropertyChanges when changing the state, like changing the opacity back to 0
+  states: [
+      State {
+          name: "menu"
+          PropertyChanges {target: menuScene; opacity: 1}
+          PropertyChanges {target: gameWindow; activeScene: menuScene}
+      },
+      State {
+          name: "game"
+          PropertyChanges {target: gameScene; opacity: 1}
+          PropertyChanges {target: gameWindow; activeScene: gameScene}
+      },
+      State {
+          name: "credits"
+          PropertyChanges {target: creditsScene; opacity: 1}
+          PropertyChanges {target: gameWindow; activeScene: creditsScene}
+      }
+  ]
 
 }
 

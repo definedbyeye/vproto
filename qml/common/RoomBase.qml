@@ -8,5 +8,8 @@ Item {
   property real dragMaxX: 0
   property real dragMinY: 0
   property real dragMaxY: roomBase.height-gameScene.height
+
+  property real defaultPlayerX: 0
+  property real defaultPlayerY: 0
 }
 

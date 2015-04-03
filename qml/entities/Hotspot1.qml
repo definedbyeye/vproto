@@ -15,7 +15,7 @@ Hotspots.HotspotBase {
     onSwipeRight: {if(sprite.spriteSequence.currentSprite !== "empty") sprite.jumpTo("boil")}
     onSwipeLeft: {if(sprite.spriteSequence.currentSprite !== "empty") sprite.jumpTo("freeze")}
 
-    onDoubleClicked: inventory.addInventory(1)
+    onDoubleClicked: inventoryPanel.addInventory(1)
 
     SpriteSequenceVPlay {
         id: sprite
