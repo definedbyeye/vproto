@@ -47,6 +47,17 @@ SceneBase {
 
     }
 
+    function updatePlayerScale(){
+        var minP = activeRoom.minPerspective;
+        var maxP = activeRoom.maxPerspective;
+        var position = (activePlayer.y+activePlayer.height) / activeRoom.height;
+        activePlayer.mediaScale = ((maxP - minP) * position) + minP;
+
+        //console.log('--------- player y changed to '+target.y+' scale: '+target.scale);
+        console.log('------------ player dimensions: '+activePlayer.height+' by '+activePlayer.width+', scale: '+activePlayer.mediaScale);
+
+    }
+
     Item {
         id: viewPort
 
@@ -118,6 +129,7 @@ SceneBase {
             target: activeRoom !== undefined ? activeRoom : null
             onGoToRoomIdChanged: {
                 setRoom(target.goToRoomId, target.fromAreaId);
+                updatePlayerScale();
             }
         }
 
@@ -134,6 +146,7 @@ SceneBase {
             onMoveStopped: {
                 storage.savePlayerPoint(Qt.point(target.x, target.y));
             }
+            onYChanged: updatePlayerScale();
         }
     }
 }

@@ -7,8 +7,8 @@ Hotspots.HotspotBase {
     hotspotId: 1
     inventoryId: 1
 
-    width: 41
-    height: 59
+    width: 32
+    height: 48
 
     onSwipeUp: {sprite.jumpTo("empty")}
     onSwipeDown: {if(sprite.spriteSequence.currentSprite !== "boil" && sprite.spriteSequence.currentSprite !== "freeze") sprite.jumpTo("full")}
@@ -19,6 +19,7 @@ Hotspots.HotspotBase {
 
     SpriteSequenceVPlay {
         id: sprite
+        anchors.fill: parent
 
         defaultSource: "../../assets/hotspot/sprite_glass.png"
 

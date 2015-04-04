@@ -7,6 +7,7 @@ EntityBase {
 
     property string direction: ""
     property int speed: 150
+    property real mediaScale: 1
 
     signal moveStopped
 
@@ -68,9 +69,9 @@ EntityBase {
     BoxCollider {
         id: playerCollider
 
-        height: 5
-        anchors.left: playerBase.left
-        anchors.right: playerBase.right
+        height: 1
+        width: 10
+        anchors.horizontalCenter: playerBase.horizontalCenter
         anchors.bottom: playerBase.bottom
 
         bodyType: Body.Dynamic

@@ -12,7 +12,6 @@ RoomBase {
     //state machine this so player can enter from multiple points
     property point defaultPlayerPoint: Qt.point(200,120);
 
-
     Component.onCompleted: {
         viewPort.anchors.top = undefined;
         viewPort.anchors.right = undefined;
@@ -43,7 +42,7 @@ RoomBase {
     Loader {
         id: glass
         x: 310
-        y: 160
+        y: 168
         source: "../entities/Hotspot1.qml"
     }
 
