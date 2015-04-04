@@ -9,8 +9,7 @@ SceneBase {
     id: gameScene
 
     // the "logical size" - the scene content is auto-scaled to match the GameWindow size
-    width: 480
-    height: 320
+
 
     property string activeRoomId
     property variant activeRoom
@@ -47,14 +46,45 @@ SceneBase {
 
     }
 
+
+    //NOTE: does not actually change player item dimensions - that screws with too many calculations atm
     function updatePlayerScale(){
         var minP = activeRoom.minPerspective;
         var maxP = activeRoom.maxPerspective;
         var position = (activePlayer.y+activePlayer.height) / activeRoom.height;
         activePlayer.mediaScale = ((maxP - minP) * position) + minP;
+    }
 
-        //console.log('--------- player y changed to '+target.y+' scale: '+target.scale);
-        console.log('------------ player dimensions: '+activePlayer.height+' by '+activePlayer.width+', scale: '+activePlayer.mediaScale);
+    //TODO: save static numbers
+    function updateRoomOffset() {
+        //if player is in the right half of the screen && there is more of the room to show to the right....
+        var midPoint = gameScene.width/2;
+        var playerX = mapFromItem(activePlayer).x;
+        if(playerX > midPoint){
+            console.log('-- playerX > midPoint: '+playerX+' > '+midPoint);
+            if(viewPort.x > -(viewPort.width - gameScene.width)){
+                console.log('-- LEFT TO RIGHT: subtract '+(playerX - midPoint)+' to '+viewPort.x);
+                viewPort.x -= playerX - midPoint;
+            }
+        } else {
+            console.log('playerX < midpoint: '+playerX+' < '+midPoint);
+            if(viewPort.x < 0){
+                console.log('-- RIGHT TO LEFT: add '+(playerX - midPoint)+' to '+viewPort.x);
+                viewPort.x -= playerX - midPoint;
+            }
+
+        }
+    }
+
+    Text {
+        id: roomTitle
+
+        anchors.top: gameScene.top;
+        anchors.left: gameScene.left;
+
+        text: activeRoomId
+
+        z: 1005
 
     }
 
@@ -85,6 +115,7 @@ SceneBase {
 
             onPressed: {
                 pressedY = mouseY + (gameScene.height - activeRoom.height);
+                console.log('------- pressedX: '+mouseX+' maps to viewport x: '+mapToItem(gameScene, mouseX, mouseY).x);
             }
             onReleased: {
                 if(pressedY < 10 && (mouseY + (gameScene.height - activeRoom.height)) > 15) {
@@ -96,15 +127,15 @@ SceneBase {
 
             /*
           property bool dragActive: drag.active
-
-          drag.target: room1
+          drag.target: activeRoom
           drag.axis: Drag.XandYAxis
           //drag.axis: Drag.XAxis
-          drag.minimumX: room1.dragMinX
-          drag.maximumX: room1.dragMaxX
-          drag.minimumY: room1.dragMinY
-          drag.maximumY: room1.dragMaxY
+          drag.minimumX: activeRoom.dragMinX
+          drag.maximumX: activeRoom.dragMaxX
+          drag.minimumY: activeRoom.dragMinY
+          drag.maximumY: activeRoom.dragMaxY
           */
+
         }
 
 
@@ -147,6 +178,7 @@ SceneBase {
                 storage.savePlayerPoint(Qt.point(target.x, target.y));
             }
             onYChanged: updatePlayerScale();
+            onXChanged: updateRoomOffset();
         }
     }
 }

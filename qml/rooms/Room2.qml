@@ -12,28 +12,21 @@ RoomBase {
     //state machine this so player can enter from multiple points
     property point defaultPlayerPoint: Qt.point(900,120);
 
+    property real defaultOffset: -(room2.width - gameScene.width);
+
     Component.onCompleted: {
+        viewPort.anchors.bottom = gameScene.gameWindowAnchorItem.bottom;
+        viewPort.x = defaultOffset
+        /*
         viewPort.anchors.top = undefined;
         viewPort.anchors.left = undefined;
         viewPort.anchors.bottom = gameScene.gameWindowAnchorItem.bottom;
         viewPort.anchors.right = gameScene.gameWindowAnchorItem.right;
+        */
     }
 
     MultiResolutionImage {
         source: "../../assets/background/bg_testing_tables.png"
-    }
-
-    Text {
-
-        anchors.top: room2.top;
-        anchors.right: room2.right;
-        anchors.rightMargin: 20
-        anchors.topMargin: 150
-
-        text: 'Room 2'
-
-        z: 1005
-
     }
 
     function placePlayer(player, fromAreaId) {

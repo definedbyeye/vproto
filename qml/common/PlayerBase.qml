@@ -17,10 +17,10 @@ EntityBase {
         var toX = moveToPointHelper.targetPoint.x
         var toY = moveToPointHelper.targetPoint.y
 
-        if((playerBase.direction == "NW" && pX <= toX && pY <= toY)
-         || (playerBase.direction == "NE" && pX > toX && pY <= toY)
-         || (playerBase.direction == "SE" && pX > toX && pY > toY)
-         || (playerBase.direction == "SW" && pX <= toX && pY > toY)) {
+        if((playerBase.direction === "NW" && pX <= toX && pY <= toY)
+         || (playerBase.direction === "NE" && pX > toX && pY <= toY)
+         || (playerBase.direction === "SE" && pX > toX && pY > toY)
+         || (playerBase.direction === "SW" && pX <= toX && pY > toY)) {
             playerCollider.linearVelocity = Qt.point(0,0);
             moveStopped();
         }
@@ -32,10 +32,10 @@ EntityBase {
         var toX = moveToPointHelper.targetPoint.x
         var toY = moveToPointHelper.targetPoint.y
 
-        if((playerBase.direction[0] == "N" && pY <= toY)
-         || (playerBase.direction[0] == "S" && pY < toY)
-         || (playerBase.direction[1] == "E" && pX > toX)
-         || (playerBase.direction[1] == "W" && pX <= toX)) {
+        if((playerBase.direction[0] === "N" && pY <= toY)
+         || (playerBase.direction[0] === "S" && pY < toY)
+         || (playerBase.direction[1] === "E" && pX > toX)
+         || (playerBase.direction[1] === "W" && pX <= toX)) {
             playerCollider.linearVelocity = Qt.point(0,0)
         }
     }
@@ -43,6 +43,7 @@ EntityBase {
     onXChanged: isTargetReached()
     onYChanged: isTargetReached()
 
+//    todo: just make this a function?
     signal move(real toX, real toY)
     onMove: {
         console.log('---------- move: '+toX+', '+toY+' player: '+playerBase.x+', '+playerBase.y);

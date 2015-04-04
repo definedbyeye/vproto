@@ -30,8 +30,6 @@ GameWindow {
 
     GameScene {
         id: gameScene
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
     }
 
     CreditsScene {

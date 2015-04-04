@@ -11,33 +11,22 @@ RoomBase {
 
     //state machine this so player can enter from multiple points
     property point defaultPlayerPoint: Qt.point(200,120);
+    property real defaultOffset: 0
 
     Component.onCompleted: {
+        /*
         viewPort.anchors.top = undefined;
         viewPort.anchors.right = undefined;
         viewPort.anchors.bottom = gameScene.gameWindowAnchorItem.bottom;
         viewPort.anchors.left = gameScene.gameWindowAnchorItem.left;
-    }
-
-    Text {
-        id: roomTitle
-
-        anchors.top: room1.top;
-        anchors.left: room1.left;
-        anchors.leftMargin: 20
-        anchors.topMargin: 150
-
-        text: 'Room 1'
-
-        z: 1005
-
+        */
+        viewPort.x = defaultOffset
+        viewPort.anchors.bottom = gameScene.gameWindowAnchorItem.bottom;
     }
 
     MultiResolutionImage {
         source: "../../assets/background/bg_testing_tables.png"
     }
-
-
 
     Loader {
         id: glass

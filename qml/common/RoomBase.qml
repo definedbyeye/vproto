@@ -9,9 +9,11 @@ Item {
   property real dragMinY: 0
   property real dragMaxY: roomBase.height-gameScene.height
 
+  property real defaultOffset: 0
+
   property point defaultPlayerPoint: Qt.point(0,0)
-  property real minPerspective: .2
-  property real maxPerspective: .9
+  property real minPerspective: .1
+  property real maxPerspective: 1
 
   property string goToRoomId: ''
   property string fromAreaId: ''
