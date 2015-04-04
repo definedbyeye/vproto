@@ -8,6 +8,8 @@ EntityBase {
     property string direction: ""
     property int speed: 150
 
+    signal moveStopped
+
     function isTargetReached() {
         var pX = playerBase.x + playerBase.width/2
         var pY = playerBase.y + playerBase.height - 5
@@ -18,7 +20,8 @@ EntityBase {
          || (playerBase.direction == "NE" && pX > toX && pY <= toY)
          || (playerBase.direction == "SE" && pX > toX && pY > toY)
          || (playerBase.direction == "SW" && pX <= toX && pY > toY)) {
-            playerCollider.linearVelocity = Qt.point(0,0)
+            playerCollider.linearVelocity = Qt.point(0,0);
+            moveStopped();
         }
     }
 
@@ -72,13 +75,12 @@ EntityBase {
 
         bodyType: Body.Dynamic
 
-        //categories: Box.Category2
-        //collidesWith: Box.Category1 //walls
-
         collisionTestingOnlyMode: false
 
         fixture.onBeginContact: {
-            playerCollider.linearVelocity = Qt.point(0,0)
+            console.log('COLLISION: player stopped moving');
+            playerCollider.linearVelocity = Qt.point(0,0);
+            moveStopped();
         }
     }
 

@@ -4,40 +4,42 @@ import "../entities"
 import "../common"
 
 RoomBase {
-    id: room1
+    id: room2
 
     height: 360
     width: 1140
 
     //state machine this so player can enter from multiple points
-    property point defaultPlayerPoint: Qt.point(200,120);
-
+    property point defaultPlayerPoint: Qt.point(900,120);
 
     Component.onCompleted: {
         viewPort.anchors.top = undefined;
-        viewPort.anchors.right = undefined;
+        viewPort.anchors.left = undefined;
         viewPort.anchors.bottom = gameScene.gameWindowAnchorItem.bottom;
-        viewPort.anchors.left = gameScene.gameWindowAnchorItem.left;
-    }
-
-    Text {
-        id: roomTitle
-
-        anchors.top: room1.top;
-        anchors.left: room1.left;
-        anchors.leftMargin: 20
-        anchors.topMargin: 150
-
-        text: 'Room 1'
-
-        z: 1005
-
+        viewPort.anchors.right = gameScene.gameWindowAnchorItem.right;
     }
 
     MultiResolutionImage {
         source: "../../assets/background/bg_testing_tables.png"
     }
 
+    Text {
+
+        anchors.top: room2.top;
+        anchors.right: room2.right;
+        anchors.rightMargin: 20
+        anchors.topMargin: 150
+
+        text: 'Room 2'
+
+        z: 1005
+
+    }
+
+    function placePlayer(player, fromAreaId) {
+        player.x = defaultPlayerPoint.x;
+        player.y = defaultPlayerPoint.y;
+    }
 
 
     Loader {
@@ -45,21 +47,6 @@ RoomBase {
         x: 310
         y: 160
         source: "../entities/Hotspot1.qml"
-    }
-
-    Area {
-        id: leftArea
-        vertices: [
-            Qt.point(240, 236), // top left
-            Qt.point(-5, 365), // bottom left
-            Qt.point(50, 360), // bottom right
-            Qt.point(245, 236) // top right
-        ]
-
-        onEntered: {
-            goToRoomId = 'room2'
-            fromAreaId= 'leftArea'
-        }
     }
 
     Wall {

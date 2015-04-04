@@ -3,6 +3,7 @@ import VPlay 2.0
 import QtQuick.LocalStorage 2.0
 
 Item {
+    id: storage
 
     //TODO: error handling
 
@@ -10,23 +11,24 @@ Item {
     property bool dbInit: false
 
     property string playerId: ""
-    property string roomId: ""
-    property int playerX: 0
-    property int playerY: 0
+    property string roomId: ""    
+    property point playerPoint: Qt.point(0,0)
+
+    onPlayerPointChanged: {console.log('--- point changed: '+playerPoint.x+', '+playerPoint.y);}
 
     //opens db and ensures all tables are created
     function openDb() {
         var db = LocalStorage.openDatabaseSync("ProtoStorage", "1.0", "Proto Game Storage", 1000000);
         if(!dbInit) {
-            createTables(db);
-            newGame(db);
+            createTables(db);            
+            storage.dbInit = true;
         }
         return db;
     }
 
     function createTables(db) {
         db.transaction(function(tx) {
-            tx.executeSql('CREATE TABLE IF NOT EXISTS SaveStates(name TEXT, playerId TEXT, roomId TEXT, x INTEGER, y INTEGER, created INTEGER, updated INTEGER)');
+            tx.executeSql('CREATE TABLE IF NOT EXISTS SaveStates(name TEXT, playerId TEXT, roomId TEXT, x REAL, y REAL, created INTEGER, updated INTEGER)');
             tx.executeSql('CREATE TABLE IF NOT EXISTS HotspotStates(saveId INTEGER, hotspotId TEXT, state TEXT)');
             tx.executeSql('CREATE TABLE IF NOT EXISTS InventoryStates(saveId INTEGER, inventoryId TEXT, state TEXT)');
             tx.executeSql('CREATE TABLE IF NOT EXISTS EventStates(saveId INTEGER, eventId TEXT, state TEXT)');
@@ -36,32 +38,51 @@ Item {
     function savePlayerState(db) {
         db = db || openDb();
         db.transaction(function(tx) {
-           tx.executeSql('UPDATE SaveStates SET playerId = "'+playerId+'", roomId = "'+roomId+'", x = '+playerX+', y = '+playerY+' WHERE ROWID = '+quickSaveId);
+            var qry = 'UPDATE SaveStates SET playerId = "'+storage.playerId+'", roomId = "'+storage.roomId+'", x = '+storage.playerPoint.x+', y = '+storage.playerPoint.y+' WHERE ROWID = '+storage.quickSaveId;
+            console.log(qry);
+           tx.executeSql(qry);
         });
+    }
+
+    function savePlayerId(pId) {
+        console.log('--- save player id: '+pId);
+        storage.playerId = pId
+        savePlayerState();
+    }
+
+    function saveRoomId(rId) {
+        console.log('--- save room id: '+rId);
+        storage.roomId = rId
+        savePlayerState();
+    }
+
+    function savePlayerPoint(point) {
+        console.log('--- save player point: '+point.x+', '+point.y);
+        storage.playerPoint = point;
+        savePlayerState();
     }
 
     function loadPlayerState(db) {
         db = db || openDb();
         db.transaction(function(tx) {
-            var result = tx.executeSql('SELECT * FROM SaveStates WHERE ROWID = ' + quickSaveId);
+            var result = tx.executeSql('SELECT * FROM SaveStates WHERE ROWID = ' + storage.quickSaveId);
             if(result.rows.length) {
-                roomId = result.rows(0).roomId;
-                playerId = result.rows(0).playerId;
-                playerX = result.rows(0).playerX;
-                playerY = result.rows(0).playerY;
+                storage.roomId = result.rows.item(0).roomId;
+                storage.playerId = result.rows.item(0).playerId;
+                storage.playerPoint = Qt.point(result.rows.item(0).x, result.rows.item(0).y);
             }
-        });
+        });        
     }
 
     function saveState (entity, id, state, db) {
         db = db || openDb();
         var tableName = entity.charAt(0).toUpperCase() + entity.slice(1) + 'States';
         db.transaction(function(tx) {            
-            var result = tx.executeSql('SELECT * FROM '+tableName+' WHERE saveId = '+quickSaveId+' AND '+entity+'Id = '+id);
+            var result = tx.executeSql('SELECT * FROM '+tableName+' WHERE saveId = '+storage.quickSaveId+' AND '+entity+'Id = '+id);
             if(result.rows.length) {
-                tx.executeSql('UPDATE '+tableName+' SET saveId='+quickSaveId+', '+entity+'Id="'+id+'", state="'+state+'" WHERE ROWID='+result.rows.item(0).rowid);
+                tx.executeSql('UPDATE '+tableName+' SET saveId='+storage.quickSaveId+', '+entity+'Id="'+id+'", state="'+state+'" WHERE ROWID='+result.rows.item(0).rowid);
             } else {
-                tx.executeSql('INSERT INTO '+tableName+' VALUES (?, ?, ?)', [quickSaveId, id, state]);
+                tx.executeSql('INSERT INTO '+tableName+' VALUES (?, ?, ?)', [storage.quickSaveId, id, state]);
             }
         });
     }
@@ -70,7 +91,7 @@ Item {
         db = db || openDb();
         var tableName = entity.charAt(0).toUpperCase() + entity.slice(1) + 'States';
         db.transaction(function(tx) {
-            var result = tx.executeSql('SELECT * FROM '+tableName+' WHERE saveId = '+quickSaveId+' AND '+entity+'Id = '+id);            
+            var result = tx.executeSql('SELECT * FROM '+tableName+' WHERE saveId = '+storage.quickSaveId+' AND '+entity+'Id = '+id);
             if(result.rows.length){
                 return result.rows.item(0).state;
             }
@@ -82,25 +103,24 @@ Item {
     //TODO: warning that all progress will be lost
     function newGame(db) {
         db = db || openDb();
-        var now = new Date('now');
 
-        deleteSave(quickSaveId, db);
+        deleteSave(storage.quickSaveId, db);
 
-        roomId = 'room1';
-        playerId = 'mainPlayer';
-        playerX = 200;
-        playerY = 120;
+        storage.roomId = 'room1';
+        storage.playerId = 'mainPlayer';
+        console.log('-- new game is updating player point to 200, 120');
+        storage.playerPoint = Qt.point(200, 120);
 
         db.transaction(function(tx) {
             tx.executeSql('INSERT INTO SaveStates (ROWID, name, playerId, roomId, x, y, created, updated) VALUES (?,?,?,?,?,?,?,?)', [
-                              quickSaveId,
+                              storage.quickSaveId,
                               "Quick Save",
-                              playerId,
-                              roomId,
-                              playerX,
-                              playerY,
-                              now.getMilliseconds(),
-                              now.getMilliseconds()
+                              storage.playerId,
+                              storage.roomId,
+                              storage.playerPoint.x,
+                              storage.playerPoint.y,
+                              Date.parse(Date()),
+                              Date.parse(Date())
                           ]);
         });
     }
@@ -111,19 +131,34 @@ Item {
 
     //loadGame loads a copy into the quickSave
     //TODO: warning that all progress will be lost
+    //TODO: loadgame should not be available under certain conditions....
     function loadGame(id, db) {
+        id = id || storage.quickSaveId;
         db = db || openDb()
-        if(id !== quickSaveId) {
-            deleteSave(quickSaveId, db);
-            copySaveStates(id, quickSaveId, db);
-            loadPlayerState(quickSaveId, db);
-        }
+
+        console.log('save id: '+id+' vs '+storage.quickSaveId);
+
+        //check that quicksave exists, else create new game
+        db.transaction(function(tx) {
+            var result = tx.executeSql('SELECT * FROM SaveStates WHERE ROWID = '+storage.quickSaveId);
+            if(result.rows.length < 1){
+                console.log('-- attempting to load a quick save, but no save found.  creating new game');
+                newGame(db);
+            }
+        });
+
+        //if(id !== quickSaveId) {
+        //    deleteSave(quickSaveId, db);
+        //    copySaveStates(id, quickSaveId, db);
+        //    loadPlayerState(quickSaveId, db);
+        //}
+        loadPlayerState(db);
     }
 
     //saveGame makes a copy out of the quickSave
     function saveGame(id, db) {
         id = id || 0;
-        copySaveStates(quickSaveId, id, db)
+        copySaveStates(storage.quickSaveId, id, db)
     }
 
     function deleteSave(saveId, db) {

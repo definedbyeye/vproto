@@ -6,115 +6,135 @@ import "../rooms"
 import "../interface"
 
 SceneBase {
-  id: gameScene
+    id: gameScene
 
-  // the "logical size" - the scene content is auto-scaled to match the GameWindow size
-  width: 480
-  height: 320  
+    // the "logical size" - the scene content is auto-scaled to match the GameWindow size
+    width: 480
+    height: 320
 
-  property string activeRoomFileName
-  property variant activeRoom
-  property string activePlayerFileName
-  property variant activePlayer
+    property string activeRoomId
+    property variant activeRoom
 
-  function load() {
-      setRoom(storage.roomId);
-      setPlayer(storage.playerId);
-      activePlayer.x = storage.playerX;
-      activePlayer.y = storage.playerY;
-  }
+    property string activePlayerId
+    property variant activePlayer
 
-  // set the name of the current level, this will cause the Loader to load the corresponding level
-  function setRoom(roomId) {
-    var roomFile = roomId.charAt(0).toUpperCase() + roomId.slice(1) + '.qml';
-    activeRoomFileName = roomFile
-  }
+    onActivePlayerIdChanged: {console.log(activePlayerId); storage.savePlayerId(activePlayerId);}
+    onActiveRoomIdChanged: {console.log(activeRoomId); storage.saveRoomId(activeRoomId);}
 
-  function setPlayer(playerId) {
-    var playerFile = playerId.charAt(0).toUpperCase() + playerId.slice(1) + '.qml';
-    activePlayerFileName = playerFile
-  }
+    function init() {
+        setPlayer(storage.playerId);
+        setRoom(storage.roomId);
 
-  Item {
-      id: viewPort
-  PhysicsWorld {
-    id: physicsWorld
-    gravity: Qt.point(0,0)
-    debugDrawVisible: true // enable this for physics debugging
-    z: 1000
-  }
+        activePlayer.x = storage.playerPoint.x;
+        activePlayer.y = storage.playerPoint.y;
+    }
 
+    function setRoom(toRoomId, fromAreaId) {
 
-
-
-  InventoryPanel {
-      id: inventoryPanel
-      width: gameScene.width - 100
-      height: gameScene.height - 100
-  }
-
-  MouseArea {
-      id: gameMouseArea
-      anchors.fill: room
-
-      property real pressedY: 0
-      onPressed: {
-          pressedY = mouseY + (gameScene.height - room.height);
-      }
-      onReleased: {
-          if(pressedY < 10 && (mouseY + (gameScene.height - room.height)) > 15) {
-              inventoryPanel.show = true
-              //inventory.y = inventory.y < 0 ? 50 : 0-height
-//              mouse.accepted = true
-          } else {
-              activePlayer.move(mouseX, mouseY)
-          }
-      }
-
-      /*
-      property bool dragActive: drag.active
-
-      drag.target: room1
-      drag.axis: Drag.XandYAxis
-      //drag.axis: Drag.XAxis
-      drag.minimumX: room1.dragMinX
-      drag.maximumX: room1.dragMaxX
-      drag.minimumY: room1.dragMinY
-      drag.maximumY: room1.dragMaxY
-      */
-  }
-
-  // load levels at runtime
-  Loader {
-    id: room
-    source: activeRoomFileName != "" ? "../rooms/" + activeRoomFileName : ""
-    onLoaded: {
-      activeRoom = item
-        viewPort.height = activeRoom.height;
-        viewPort.width = activeRoom.width;
-        viewPort.anchors.bottom = gameScene.gameWindowAnchorItem.bottom
-        viewPort.anchors.left = gameScene.gameWindowAnchorItem.left
+        //allow new room to set the player's position based on the old room
+        //TODO: fromHotspotId
+        //roomLoader.fromHotspotId = activeRoomId;
+        activeRoomId = toRoomId;
+        roomLoader.fromAreaId = fromAreaId || '';
+        roomLoader.source = "../rooms/" + activeRoomId.charAt(0).toUpperCase() + activeRoomId.slice(1) + '.qml';
 
     }
-  }
 
-  // we connect the gameScene to the loaded level
-  Connections {
-      // only connect if a level is loaded, to prevent errors
-      target: activeRoom !== undefined ? activeRoom : null
-  }
+    function setPlayer(playerId) {
 
-  Loader {
-      id: player
-      source: activePlayerFileName != "" ? "../players/" + activePlayerFileName : ""
-      onLoaded: {
-        activePlayer = item
-      }
-  }
+        activePlayerId = playerId;
+        playerLoader.source = "../players/" + activePlayerId.charAt(0).toUpperCase() + activePlayerId.slice(1) + '.qml';
 
-  Connections {
-      target: activePlayer !== undefined ? activePlayer : null
-  }
-}
+    }
+
+    Item {
+        id: viewPort
+
+        height: activeRoom ? activeRoom.height : gameScene.height;
+        width: activeRoom ? activeRoom.width: gameScene.width;
+
+        PhysicsWorld {
+            id: physicsWorld
+            gravity: Qt.point(0,0)
+            debugDrawVisible: true // enable this for physics debugging
+            z: 1000
+        }
+
+        InventoryPanel {
+            id: inventoryPanel
+            width: gameScene.width - 100
+            height: gameScene.height - 100
+        }
+
+        MouseArea {
+            id: gameMouseArea
+            anchors.fill: viewPort;
+
+            property real pressedY: 0
+
+            onPressed: {
+                pressedY = mouseY + (gameScene.height - activeRoom.height);
+            }
+            onReleased: {
+                if(pressedY < 10 && (mouseY + (gameScene.height - activeRoom.height)) > 15) {
+                    inventoryPanel.show = true
+                } else {
+                    activePlayer.move(mouseX, mouseY)
+                }
+            }
+
+            /*
+          property bool dragActive: drag.active
+
+          drag.target: room1
+          drag.axis: Drag.XandYAxis
+          //drag.axis: Drag.XAxis
+          drag.minimumX: room1.dragMinX
+          drag.maximumX: room1.dragMaxX
+          drag.minimumY: room1.dragMinY
+          drag.maximumY: room1.dragMaxY
+          */
+        }
+
+
+
+
+        // load levels at runtime
+        Loader {
+            id: roomLoader
+            source: ''
+
+            property string fromAreaId: ''
+
+            onLoaded: {
+                activeRoom = item;
+                activeRoom.placePlayer(activePlayer, fromAreaId);
+            }
+        }
+
+        // we connect the gameScene to the loaded level
+        Connections {
+            // only connect if a level is loaded, to prevent errors
+            target: activeRoom !== undefined ? activeRoom : null
+            onGoToRoomIdChanged: {
+                setRoom(target.goToRoomId, target.fromAreaId);
+            }
+        }
+
+        Loader {
+            id: playerLoader
+            source: ''
+            onLoaded: {
+                activePlayer = item
+            }
+        }
+
+        Connections {
+            target: activePlayer !== undefined ? activePlayer : null
+            onMoveStopped: {
+                storage.savePlayerPoint(Qt.point(target.x, target.y));
+            }
+        }
+    }
 }
 

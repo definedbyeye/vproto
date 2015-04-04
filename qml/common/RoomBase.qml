@@ -9,7 +9,17 @@ Item {
   property real dragMinY: 0
   property real dragMaxY: roomBase.height-gameScene.height
 
-  property real defaultPlayerX: 0
-  property real defaultPlayerY: 0
+  property point defaultPlayerPoint: Qt.point(0,0)
+
+  property string goToRoomId: ''
+  property string fromAreaId: ''
+
+  property bool loaded: false;
+
+  function placePlayer(player, fromAreaId) {
+      player.x = defaultPlayerPoint.x;
+      player.y = defaultPlayerPoint.y;
+  }
+
 }
 

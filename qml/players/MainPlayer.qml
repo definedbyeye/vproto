@@ -13,6 +13,7 @@ PlayerBase {
     // here you could use a SpriteSquenceVPlay to animate your player
     MultiResolutionImage {
         source: "../../assets/player/player.png"
+        z: 2000
     }
 
 }
