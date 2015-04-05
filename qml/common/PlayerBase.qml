@@ -45,8 +45,7 @@ EntityBase {
 
 //    todo: just make this a function?
     signal move(real toX, real toY)
-    onMove: {
-        console.log('---------- move: '+toX+', '+toY+' player: '+playerBase.x+', '+playerBase.y);
+    onMove: {        
         var fromX = playerBase.x + playerBase.width/2
         var fromY = playerBase.y + playerBase.height - 5
         var diffX = toX - fromX
@@ -79,8 +78,7 @@ EntityBase {
 
         collisionTestingOnlyMode: false
 
-        fixture.onBeginContact: {
-            console.log('COLLISION: player stopped moving');
+        fixture.onBeginContact: {            
             playerCollider.linearVelocity = Qt.point(0,0);
             moveStopped();
         }

@@ -14,8 +14,6 @@ Item {
     property string roomId: ""    
     property point playerPoint: Qt.point(0,0)
 
-    onPlayerPointChanged: {console.log('--- point changed: '+playerPoint.x+', '+playerPoint.y);}
-
     //opens db and ensures all tables are created
     function openDb() {
         var db = LocalStorage.openDatabaseSync("ProtoStorage", "1.0", "Proto Game Storage", 1000000);
@@ -39,25 +37,21 @@ Item {
         db = db || openDb();
         db.transaction(function(tx) {
             var qry = 'UPDATE SaveStates SET playerId = "'+storage.playerId+'", roomId = "'+storage.roomId+'", x = '+storage.playerPoint.x+', y = '+storage.playerPoint.y+' WHERE ROWID = '+storage.quickSaveId;
-            console.log(qry);
            tx.executeSql(qry);
         });
     }
 
     function savePlayerId(pId) {
-        console.log('--- save player id: '+pId);
         storage.playerId = pId
         savePlayerState();
     }
 
     function saveRoomId(rId) {
-        console.log('--- save room id: '+rId);
         storage.roomId = rId
         savePlayerState();
     }
 
     function savePlayerPoint(point) {
-        console.log('--- save player point: '+point.x+', '+point.y);
         storage.playerPoint = point;
         savePlayerState();
     }
@@ -106,9 +100,9 @@ Item {
 
         deleteSave(storage.quickSaveId, db);
 
+        //defaults
         storage.roomId = 'room1';
         storage.playerId = 'mainPlayer';
-        console.log('-- new game is updating player point to 200, 120');
         storage.playerPoint = Qt.point(200, 120);
 
         db.transaction(function(tx) {
@@ -136,13 +130,10 @@ Item {
         id = id || storage.quickSaveId;
         db = db || openDb()
 
-        console.log('save id: '+id+' vs '+storage.quickSaveId);
-
         //check that quicksave exists, else create new game
         db.transaction(function(tx) {
             var result = tx.executeSql('SELECT * FROM SaveStates WHERE ROWID = '+storage.quickSaveId);
             if(result.rows.length < 1){
-                console.log('-- attempting to load a quick save, but no save found.  creating new game');
                 newGame(db);
             }
         });

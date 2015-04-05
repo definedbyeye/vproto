@@ -17,8 +17,8 @@ SceneBase {
     property string activePlayerId
     property variant activePlayer
 
-    onActivePlayerIdChanged: {console.log(activePlayerId); storage.savePlayerId(activePlayerId);}
-    onActiveRoomIdChanged: {console.log(activeRoomId); storage.saveRoomId(activeRoomId);}
+    onActivePlayerIdChanged: storage.savePlayerId(activePlayerId);
+    onActiveRoomIdChanged: storage.saveRoomId(activeRoomId);
 
     function init() {
         setPlayer(storage.playerId);
@@ -61,15 +61,11 @@ SceneBase {
         var midPoint = gameScene.width/2;
         var playerX = mapFromItem(activePlayer).x;
         if(playerX > midPoint){
-            console.log('-- playerX > midPoint: '+playerX+' > '+midPoint);
             if(viewPort.x > -(viewPort.width - gameScene.width)){
-                console.log('-- LEFT TO RIGHT: subtract '+(playerX - midPoint)+' to '+viewPort.x);
                 viewPort.x -= playerX - midPoint;
             }
         } else {
-            console.log('playerX < midpoint: '+playerX+' < '+midPoint);
             if(viewPort.x < 0){
-                console.log('-- RIGHT TO LEFT: add '+(playerX - midPoint)+' to '+viewPort.x);
                 viewPort.x -= playerX - midPoint;
             }
 
@@ -115,7 +111,6 @@ SceneBase {
 
             onPressed: {
                 pressedY = mouseY + (gameScene.height - activeRoom.height);
-                console.log('------- pressedX: '+mouseX+' maps to viewport x: '+mapToItem(gameScene, mouseX, mouseY).x);
             }
             onReleased: {
                 if(pressedY < 10 && (mouseY + (gameScene.height - activeRoom.height)) > 15) {

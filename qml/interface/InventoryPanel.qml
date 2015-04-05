@@ -28,8 +28,7 @@ Rectangle {
         property int count: 1;
         anchors.right: inventoryPanel.right
         text: "Add Inventory"
-        onClicked: {
-            console.log('clicked');
+        onClicked: {        
             inventoryManager.createEntityFromUrlWithProperties(
                         Qt.resolvedUrl("InventoryItem.qml"),
                         {"color": "green", "entityId": "i"+count, "text": count, "width": "50"}

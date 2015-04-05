@@ -15,7 +15,6 @@ PolygonCollider {
 
     fixture.onBeginContact: {
         entered();
-        console.log('-- Player stepped on an AREA');
     }
 
 }
