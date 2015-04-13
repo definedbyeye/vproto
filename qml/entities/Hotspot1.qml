@@ -1,8 +1,8 @@
 import VPlay 2.0
 import QtQuick 2.4
-import "." as Hotspots
+import "../common"
 
-Hotspots.HotspotBase {
+HotspotBase {
 
     hotspotId: 1
     inventoryId: 1
@@ -15,7 +15,8 @@ Hotspots.HotspotBase {
     onSwipeRight: {if(sprite.spriteSequence.currentSprite !== "empty") sprite.jumpTo("boil")}
     onSwipeLeft: {if(sprite.spriteSequence.currentSprite !== "empty") sprite.jumpTo("freeze")}
 
-    onDoubleClicked: inventoryPanel.addInventory(1)
+    onHold: {console.log('---- add glass to inventory'); inventoryPanel.addInventory('fullGlass');}
+    //onDoubleClicked: inventoryPanel.addInventory(1)
 
     SpriteSequenceVPlay {
         id: sprite

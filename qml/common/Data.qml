@@ -10,15 +10,12 @@ Item {
     property int quickSaveId: 1
     property bool dbInit: false
 
-    property string playerId: ""
-    property string roomId: ""    
-    property point playerPoint: Qt.point(0,0)
-
     //opens db and ensures all tables are created
     function openDb() {
         var db = LocalStorage.openDatabaseSync("ProtoStorage", "1.0", "Proto Game Storage", 1000000);
         if(!dbInit) {
-            createTables(db);            
+            createTables(db);
+            preloadInventoryItems(db)
             storage.dbInit = true;
         }
         return db;
@@ -30,50 +27,90 @@ Item {
             tx.executeSql('CREATE TABLE IF NOT EXISTS HotspotStates(saveId INTEGER, hotspotId TEXT, state TEXT)');
             tx.executeSql('CREATE TABLE IF NOT EXISTS InventoryStates(saveId INTEGER, inventoryId TEXT, state TEXT)');
             tx.executeSql('CREATE TABLE IF NOT EXISTS EventStates(saveId INTEGER, eventId TEXT, state TEXT)');
+
+            tx.executeSql('CREATE TABLE IF NOT EXISTS InventoryItems(inventoryId TEXT, name TEXT, description TEXT)');
         });
     }
 
-    function savePlayerState(db) {
-        db = db || openDb();
+    function preloadInventoryItems(db) {
         db.transaction(function(tx) {
-            var qry = 'UPDATE SaveStates SET playerId = "'+storage.playerId+'", roomId = "'+storage.roomId+'", x = '+storage.playerPoint.x+', y = '+storage.playerPoint.y+' WHERE ROWID = '+storage.quickSaveId;
+            var result = tx.executeSql('SELECT ROWID FROM InventoryItems');
+            if(result.rows.length !== 1) {
+                console.log('--- inventoryId count did not = 3: '+result.rows.length);
+                var inventoryItems = [
+                        {inventoryId: 'emptyGlass', name: 'Empty Glass', description: 'This glass is empty.'},
+                        {inventoryId: 'fullGlass', name: 'Glass of Water', description: 'This glass is half full.'},
+                        {inventoryId: 'scissors', name: 'Scissors', description: 'Sharp blue scissors.'}
+                        ];
+                tx.executeSql('DELETE FROM InventoryItems');
+
+                var qry = 'INSERT INTO InventoryItems SELECT "'+
+                        inventoryItems[0].inventoryId+'" as inventoryId, "'+
+                        inventoryItems[0].name+'" as name, "'+
+                        inventoryItems[0].description+'" as description ';
+                for(var i = 1; i < inventoryItems.length; i++) {
+                    qry += ' UNION SELECT "'+
+                            inventoryItems[i].inventoryId+'", "'+
+                            inventoryItems[i].name+'", "'+
+                            inventoryItems[i].description+'"'
+                }
+                tx.executeSql(qry);
+            }
+        });
+    }
+
+    function getInventoryItem(inventoryId) {
+        var inv = false;
+        var db = openDb();
+        db.transaction(function(tx) {
+            var result = tx.executeSql('SELECT * FROM InventoryItems WHERE inventoryId = "'+inventoryId+'"');                       
+            inv = result.rows.item(0);
+        });
+        return inv;
+    }
+
+    function savePlayerId(pId) {
+        var db = openDb();
+        db.transaction(function(tx) {
+            var qry = 'UPDATE SaveStates SET playerId = "'+pId+'" WHERE ROWID = '+storage.quickSaveId;
            tx.executeSql(qry);
         });
     }
 
-    function savePlayerId(pId) {
-        storage.playerId = pId
-        savePlayerState();
-    }
-
     function saveRoomId(rId) {
-        storage.roomId = rId
-        savePlayerState();
+        var db = openDb();
+        db.transaction(function(tx) {
+            var qry = 'UPDATE SaveStates SET roomId = "'+rId+'" WHERE ROWID = '+storage.quickSaveId;
+           tx.executeSql(qry);
+        });
     }
 
     function savePlayerPoint(point) {
-        storage.playerPoint = point;
-        savePlayerState();
+        var db = openDb();
+        db.transaction(function(tx) {
+            var qry = 'UPDATE SaveStates SET x = '+point.x+', y = '+point.y+' WHERE ROWID = '+storage.quickSaveId;
+           tx.executeSql(qry);
+        });
     }
 
-    function loadPlayerState(db) {
+    function getPlayerState(db) {
+        var saveState = false;
         db = db || openDb();
         db.transaction(function(tx) {
             var result = tx.executeSql('SELECT * FROM SaveStates WHERE ROWID = ' + storage.quickSaveId);
             if(result.rows.length) {
-                storage.roomId = result.rows.item(0).roomId;
-                storage.playerId = result.rows.item(0).playerId;
-                storage.playerPoint = Qt.point(result.rows.item(0).x, result.rows.item(0).y);
+                saveState = result.rows.item(0);
             }
-        });        
+        });
+        return saveState;
     }
 
     function saveState (entity, id, state, db) {
         db = db || openDb();
         var tableName = entity.charAt(0).toUpperCase() + entity.slice(1) + 'States';
-        db.transaction(function(tx) {            
-            var result = tx.executeSql('SELECT * FROM '+tableName+' WHERE saveId = '+storage.quickSaveId+' AND '+entity+'Id = '+id);
-            if(result.rows.length) {
+        db.transaction(function(tx) {                        
+            var result = tx.executeSql('SELECT *, rowid FROM '+tableName+' WHERE saveId = '+storage.quickSaveId+' AND '+entity+'Id = "'+id+'"');
+            if(result.rows.length) {            
                 tx.executeSql('UPDATE '+tableName+' SET saveId='+storage.quickSaveId+', '+entity+'Id="'+id+'", state="'+state+'" WHERE ROWID='+result.rows.item(0).rowid);
             } else {
                 tx.executeSql('INSERT INTO '+tableName+' VALUES (?, ?, ?)', [storage.quickSaveId, id, state]);
@@ -100,23 +137,19 @@ Item {
 
         deleteSave(storage.quickSaveId, db);
 
-        //defaults
-        storage.roomId = 'room1';
-        storage.playerId = 'mainPlayer';
-        storage.playerPoint = Qt.point(200, 120);
-
         db.transaction(function(tx) {
             tx.executeSql('INSERT INTO SaveStates (ROWID, name, playerId, roomId, x, y, created, updated) VALUES (?,?,?,?,?,?,?,?)', [
                               storage.quickSaveId,
                               "Quick Save",
-                              storage.playerId,
-                              storage.roomId,
-                              storage.playerPoint.x,
-                              storage.playerPoint.y,
+                              'mainPlayer',
+                              'room1',
+                              200,
+                              120,
                               Date.parse(Date()),
                               Date.parse(Date())
                           ]);
-        });
+        });    
+
     }
 
     function continueGame(db) {
@@ -138,12 +171,26 @@ Item {
             }
         });
 
-        //if(id !== quickSaveId) {
-        //    deleteSave(quickSaveId, db);
-        //    copySaveStates(id, quickSaveId, db);
-        //    loadPlayerState(quickSaveId, db);
-        //}
-        loadPlayerState(db);
+        //default inventory
+        storage.saveState('inventory', 'emptyGlass', '', db);
+        storage.saveState('inventory', 'fullGlass', '', db);
+        storage.saveState('inventory', 'scissors', '', db);
+    }
+
+    //returns a collection of inventory ID's and states that are currently in the player's inventory
+    function getInventoryState(db){
+        var invItems = [];
+        db = db || openDb();
+        db.transaction(function(tx) {
+            var result = tx.executeSql('SELECT * FROM InventoryStates WHERE saveId = ' + storage.quickSaveId);
+            if(result.rows.length) {
+                for(var i=0; i < result.rows.length; i++){
+                    invItems.push(result.rows.item(i))
+                }
+            }
+        });
+        return invItems;
+
     }
 
     //saveGame makes a copy out of the quickSave

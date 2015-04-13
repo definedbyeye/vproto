@@ -8,8 +8,9 @@ import "../interface"
 SceneBase {
     id: gameScene
 
-    // the "logical size" - the scene content is auto-scaled to match the GameWindow size
-
+    // the "logical size" - the scene content is auto-scaled to match the GameWindow size    
+    height: 320
+    width: 480
 
     property string activeRoomId
     property variant activeRoom
@@ -21,11 +22,22 @@ SceneBase {
     onActiveRoomIdChanged: storage.saveRoomId(activeRoomId);
 
     function init() {
-        setPlayer(storage.playerId);
-        setRoom(storage.roomId);
+        var gameState = storage.getPlayerState();
 
-        activePlayer.x = storage.playerPoint.x;
-        activePlayer.y = storage.playerPoint.y;
+        setPlayer(gameState.playerId);
+        setRoom(gameState.roomId);
+        activePlayer.x = gameState.x;
+        activePlayer.y = gameState.y;
+
+        initInventory();                
+    }
+
+    function initInventory() {
+        var inventoryItems = storage.getInventoryState();
+        for(var i = 0; i < inventoryItems.length; i++){
+            console.log('----------- add inventory: '+inventoryItems[i].inventoryId);
+            inventoryPanel.addInventory(inventoryItems[i].inventoryId, false); //TODO: extend to add state eg qty
+        }
     }
 
     function setRoom(toRoomId, fromAreaId) {
@@ -84,6 +96,7 @@ SceneBase {
 
     }
 
+
     Item {
         id: viewPort
 
@@ -97,39 +110,20 @@ SceneBase {
             z: 1000
         }
 
-        InventoryPanel {
-            id: inventoryPanel
-            width: gameScene.width - 100
-            height: gameScene.height - 100
-        }
-
         MouseArea {
-            id: gameMouseArea
+            id: clickToMove
             anchors.fill: viewPort;
 
             property real pressedY: 0
+            propagateComposedEvents: true
 
             onPressed: {
                 pressedY = mouseY + (gameScene.height - activeRoom.height);
             }
             onReleased: {
-                if(pressedY < 10 && (mouseY + (gameScene.height - activeRoom.height)) > 15) {
-                    inventoryPanel.show = true
-                } else {
-                    activePlayer.move(mouseX, mouseY)
-                }
+                console.log('click to move');
+                activePlayer.move(mouseX, mouseY)
             }
-
-            /*
-          property bool dragActive: drag.active
-          drag.target: activeRoom
-          drag.axis: Drag.XandYAxis
-          //drag.axis: Drag.XAxis
-          drag.minimumX: activeRoom.dragMinX
-          drag.maximumX: activeRoom.dragMaxX
-          drag.minimumY: activeRoom.dragMinY
-          drag.maximumY: activeRoom.dragMaxY
-          */
 
         }
 
@@ -176,5 +170,28 @@ SceneBase {
             onXChanged: updateRoomOffset();
         }
     }
+
+    InventoryPanel {
+        id: inventoryPanel
+    }
+
+
+    Rectangle {
+        color: "white"
+        opacity: .2
+
+        anchors.top: gameScene.top;
+        anchors.left: gameScene.left;
+        anchors.right: gameScene.right;
+
+        height: 15;
+
+        MouseArea {
+            id: gameSceneUI
+            anchors.fill: parent
+            onReleased: inventoryPanel.show = true
+        }
+    }
+
 }
 

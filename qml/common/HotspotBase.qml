@@ -13,6 +13,7 @@ EntityBase {
     signal swipeRight()
     signal clicked()
     signal doubleClicked()
+    signal hold()
 
     //MultiResolutionImage {
     //    source: "../../assets/hotspot/sprite_glass.png"
@@ -27,6 +28,7 @@ EntityBase {
         onReleased: triggerSwipe(parent, mouse)
         onClicked: parent.clicked()
         onDoubleClicked: parent.doubleClicked()
+        onPressAndHold: parent.hold()
     }
 
     //only triggers a swipe if the mouse has traveled > 20

@@ -11,6 +11,11 @@ GameWindow {
     width: 960
     height: 640
 
+    // set custom style
+    settings.style: CustomStyle {
+        id: customStyle
+    }
+
     Data {
         id: storage
     }
