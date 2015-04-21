@@ -1,7 +1,7 @@
 import VPlay 2.0
 import QtQuick 2.0
 import "../common"
-import "../entities"
+import "../interactables"
 import "../rooms"
 import "../interface"
 
@@ -17,6 +17,9 @@ SceneBase {
 
     property string activePlayerId
     property variant activePlayer
+
+    property variant activePanel
+
 
     onActivePlayerIdChanged: storage.savePlayerId(activePlayerId);
     onActiveRoomIdChanged: storage.saveRoomId(activeRoomId);
@@ -34,8 +37,7 @@ SceneBase {
 
     function initInventory() {
         var inventoryItems = storage.getInventoryState();
-        for(var i = 0; i < inventoryItems.length; i++){
-            console.log('----------- add inventory: '+inventoryItems[i].inventoryId);
+        for(var i = 0; i < inventoryItems.length; i++){            
             inventoryPanel.addInventory(inventoryItems[i].inventoryId, false); //TODO: extend to add state eg qty
         }
     }
@@ -43,8 +45,8 @@ SceneBase {
     function setRoom(toRoomId, fromAreaId) {
 
         //allow new room to set the player's position based on the old room
-        //TODO: fromHotspotId
-        //roomLoader.fromHotspotId = activeRoomId;
+        //TODO: fromInteractId
+        //roomLoader.fromInteractId = activeRoomId;
         activeRoomId = toRoomId;
         roomLoader.fromAreaId = fromAreaId || '';
         roomLoader.source = "../rooms/" + activeRoomId.charAt(0).toUpperCase() + activeRoomId.slice(1) + '.qml';
@@ -97,6 +99,7 @@ SceneBase {
     }
 
 
+    // contains the full room.  gamescene only shows part of this.
     Item {
         id: viewPort
 
@@ -120,14 +123,11 @@ SceneBase {
             onPressed: {
                 pressedY = mouseY + (gameScene.height - activeRoom.height);
             }
-            onReleased: {
-                console.log('click to move');
+            onReleased: {                
                 activePlayer.move(mouseX, mouseY)
             }
 
         }
-
-
 
 
         // load levels at runtime
@@ -146,7 +146,7 @@ SceneBase {
         // we connect the gameScene to the loaded level
         Connections {
             // only connect if a level is loaded, to prevent errors
-            target: activeRoom !== undefined ? activeRoom : null
+            target: activeRoom !== undefined ? activeRoom : null        
             onGoToRoomIdChanged: {
                 setRoom(target.goToRoomId, target.fromAreaId);
                 updatePlayerScale();
@@ -171,11 +171,30 @@ SceneBase {
         }
     }
 
+    //single instance global interfaces
     InventoryPanel {
         id: inventoryPanel
     }
 
+    Loader {
+        id: panelLoader
+        anchors.fill: parent
+        onLoaded: {
+            activePanel = item
+        }
+        onSourceChanged: {
+            if(source === null) {
+                activePanel = null;
+            }
+        }
+    }
 
+    Connections {
+        target: activePanel !== undefined ? activePanel : null
+    }
+
+
+    //inventory panel visual helper
     Rectangle {
         color: "white"
         opacity: .2

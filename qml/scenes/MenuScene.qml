@@ -36,7 +36,7 @@ SceneBase {
             onClicked: continueGamePressed()
         }
         MenuButton {
-            text: "Credits"
+            text: "Roadmap"
             onClicked: creditsPressed()
         }
 
@@ -52,6 +52,10 @@ SceneBase {
         storage.loadGame();
         gameWindow.state = "game"
         gameScene.init();
+    }
+
+    onCreditsPressed: {
+        gameWindow.state = "credits"
     }
 
     onBackButtonPressed: {

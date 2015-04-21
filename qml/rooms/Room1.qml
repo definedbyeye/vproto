@@ -1,6 +1,6 @@
 import VPlay 2.0
 import QtQuick 2.0
-import "../entities"
+import "../interactables"
 import "../common"
 
 RoomBase {
@@ -9,32 +9,64 @@ RoomBase {
     height: 360
     width: 1140
 
-    //state machine this so player can enter from multiple points
+    // TODO: allow player to enter from multiple points
     property point defaultPlayerPoint: Qt.point(200,120);
     property real defaultOffset: 0
 
     Component.onCompleted: {
-        /*
-        viewPort.anchors.top = undefined;
-        viewPort.anchors.right = undefined;
-        viewPort.anchors.bottom = gameScene.gameWindowAnchorItem.bottom;
-        viewPort.anchors.left = gameScene.gameWindowAnchorItem.left;
-        */
         viewPort.x = defaultOffset
         viewPort.anchors.bottom = gameScene.gameWindowAnchorItem.bottom;
     }
 
-    MultiResolutionImage {
+    // background
+    MultiResolutionImage {        
         source: "../../assets/background/bg_testing_tables.png"
     }
 
+    // interaction areas
+    // currently loads 1 per qml
+    /*
     Loader {
         id: glass
         x: 310
         y: 168
-        source: "../entities/Hotspot1.qml"
+        source: "../interactables/Interact1.qml"
+    }
+    */
+
+    Look {
+        areaVertices: [Qt.point(0,0), Qt.point(150, 0), Qt.point(100, 100), Qt.point(0, 200)]
+        message: "This is only a test... bzzzzzp...."
     }
 
+    Take {
+        inventoryId: 'emptyGlass'
+        x: 310
+        y: 168
+        width: 32
+        height: 48
+        boxColor: '#cc0011'
+    }
+
+
+
+    //Action Sequence
+    //Item {
+
+   // inventoryManager.createItemFromUrlWithProperties(
+     //           Qt.resolvedUrl("../common/InventoryBase.qml"), invItem);
+
+        //ex: throw something out the window
+
+        //drop inventory on interactable
+        //move to point
+        //stub animation
+        //message
+    //}
+
+
+
+    // transition areas
     Area {
         id: leftArea
         vertices: [
@@ -50,6 +82,8 @@ RoomBase {
         }
     }
 
+
+    // walkable area boundaries
     Wall {
         id: leftWall
         vertices: [

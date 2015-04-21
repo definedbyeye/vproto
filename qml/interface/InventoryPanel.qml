@@ -28,8 +28,6 @@ Item {
                 storage.saveState('inventory', inventoryId, '');
             }
         }
-
-
     }
 
     MouseArea {

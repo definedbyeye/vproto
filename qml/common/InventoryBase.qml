@@ -1,7 +1,9 @@
 import VPlay 2.0
 import QtQuick 2.0
 
-Item {    
+EntityBase {
+    entityId: inventoryId
+    entityType: 'inventory'
 
     height: 60
     width: 60

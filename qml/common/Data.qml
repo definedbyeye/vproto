@@ -24,7 +24,7 @@ Item {
     function createTables(db) {
         db.transaction(function(tx) {
             tx.executeSql('CREATE TABLE IF NOT EXISTS SaveStates(name TEXT, playerId TEXT, roomId TEXT, x REAL, y REAL, created INTEGER, updated INTEGER)');
-            tx.executeSql('CREATE TABLE IF NOT EXISTS HotspotStates(saveId INTEGER, hotspotId TEXT, state TEXT)');
+            tx.executeSql('CREATE TABLE IF NOT EXISTS InteractStates(saveId INTEGER, interactId TEXT, state TEXT)');
             tx.executeSql('CREATE TABLE IF NOT EXISTS InventoryStates(saveId INTEGER, inventoryId TEXT, state TEXT)');
             tx.executeSql('CREATE TABLE IF NOT EXISTS EventStates(saveId INTEGER, eventId TEXT, state TEXT)');
 
@@ -203,7 +203,7 @@ Item {
         db = db || openDb();
         db.transaction(function(tx) {
             tx.executeSql('DELETE FROM SaveStates WHERE ROWID = ' + saveId);
-            tx.executeSql('DELETE FROM HotspotStates WHERE saveId = ' + saveId);
+            tx.executeSql('DELETE FROM InteractStates WHERE saveId = ' + saveId);
             tx.executeSql('DELETE FROM InventoryStates WHERE saveId = ' + saveId);
             tx.executeSql('DELETE FROM EventStates WHERE saveId = ' + saveId);
         });
@@ -228,11 +228,11 @@ Item {
                 }
             }
 
-            result = tx.executeSql('SELECT * FROM HotspotStates WHERE saveId = ' + fromId);
+            result = tx.executeSql('SELECT * FROM InteractStates WHERE saveId = ' + fromId);
             if(result.rows.length){
-                qry = 'INSERT INTO HotspotStates SELECT "'+result.rows.item(0).hotspotId+'" as hotspotId, "'+result.rows.item(0).state+'" as state';
+                qry = 'INSERT INTO InteractStates SELECT "'+result.rows.item(0).interactId+'" as interactId, "'+result.rows.item(0).state+'" as state';
                 for(i = 1; i < result.rows.length; i++) {
-                    qry += ' UNION SELECT "'+result.rows.item(i).hotspotId+'", "'+result.rows.item(i).state+'"';
+                    qry += ' UNION SELECT "'+result.rows.item(i).interactId+'", "'+result.rows.item(i).state+'"';
                 }
                 tx.executeSql(qry);
             }

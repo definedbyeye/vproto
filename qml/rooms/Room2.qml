@@ -1,6 +1,6 @@
 import VPlay 2.0
 import QtQuick 2.0
-import "../entities"
+import "../interactables"
 import "../common"
 
 RoomBase {
@@ -39,7 +39,7 @@ RoomBase {
         id: glass
         x: 310
         y: 160
-        source: "../entities/Hotspot1.qml"
+        source: "../interactables/Interact1.qml"
     }
 
     Wall {
