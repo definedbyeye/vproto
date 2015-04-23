@@ -258,7 +258,6 @@ console.log('----------- loading states');
             states = 'import QtQuick 2.0; import VPlay 2.0; EntityBase { id: sampleScript
                 onStateChanged: {console.log("-- state changed to "+state)}
                 state: "'+sequence[0].name+'"; states: ['+states+'] }';
-            console.log(states);
             Qt.createQmlObject(states, scriptedSequence);
         }
     }
