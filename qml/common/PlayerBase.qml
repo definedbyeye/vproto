@@ -10,6 +10,7 @@ EntityBase {
     property real mediaScale: 1
 
     signal moveStopped
+    signal targetReached
 
     function isTargetReached() {
         var pX = playerBase.x + playerBase.width/2
@@ -22,10 +23,11 @@ EntityBase {
          || (playerBase.direction === "SE" && pX > toX && pY > toY)
          || (playerBase.direction === "SW" && pX <= toX && pY > toY)) {
             playerCollider.linearVelocity = Qt.point(0,0);
-            moveStopped();
+            targetReached();
         }
     }
 
+    //doesn't work
     function isTargetCloseEnough() {
         var pX = playerBase.x + playerBase.width/2
         var pY = playerBase.y + playerBase.height - 5
@@ -40,12 +42,14 @@ EntityBase {
         }
     }
 
+    //todo: throttle this?
     onXChanged: isTargetReached()
     onYChanged: isTargetReached()
 
 //    todo: just make this a function?
-    signal move(real toX, real toY)
-    onMove: {        
+    signal moveTo(real toX, real toY)
+
+    onMoveTo: {
         var fromX = playerBase.x + playerBase.width/2
         var fromY = playerBase.y + playerBase.height - 5
         var diffX = toX - fromX

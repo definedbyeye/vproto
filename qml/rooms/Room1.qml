@@ -24,19 +24,11 @@ RoomBase {
     }
 
     // interaction areas
-    // currently loads 1 per qml
-    /*
-    Loader {
-        id: glass
-        x: 310
-        y: 168
-        source: "../interactables/Interact1.qml"
-    }
-    */
 
+    /*
     Look {
         areaVertices: [Qt.point(0,0), Qt.point(150, 0), Qt.point(100, 100), Qt.point(0, 200)]
-        message: "This is only a test... bzzzzzp...."
+        message: "This is only a test... bzzzzzp...."        
     }
 
     Take {
@@ -47,23 +39,25 @@ RoomBase {
         height: 48
         boxColor: '#cc0011'
     }
+*/
+    Rectangle {
+        x: 400
+        y: 300
+        width: 50
+        height: 50
+        color: "lightblue"
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {scriptedSequence.sequence = [
+                            {name: 'getCloser', change: [{on: 'onPlayerReachedTarget', to: 'firstLook'}],  type: 'moveTo', x: 190, y: 287},
+                            {name: 'firstLook', change: [{on: 'onPanelClosed', to: 'moveAway'}],           type: 'look',   message: 'It looks big.'},
+                            {name: 'moveAway',  change: [{on: 'onPlayerReachedTarget', to: 'secondLook'}], type: 'moveTo', x: 330, y: 287},
+                            {name: 'secondLook', type: 'look', message: 'Now it looks small.'}
+                        ]}
 
+        }
 
-
-    //Action Sequence
-    //Item {
-
-   // inventoryManager.createItemFromUrlWithProperties(
-     //           Qt.resolvedUrl("../common/InventoryBase.qml"), invItem);
-
-        //ex: throw something out the window
-
-        //drop inventory on interactable
-        //move to point
-        //stub animation
-        //message
-    //}
-
+    }
 
 
     // transition areas

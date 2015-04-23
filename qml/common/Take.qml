@@ -35,7 +35,7 @@ InteractableBase {
             activePanel.closePanel();
         }
         onClose: {
-            //panel removes itself after signaling close
+            target = null;
         }
     }
 
