@@ -15,15 +15,11 @@ PanelBase {
         id: dialogFrame
         color: "#cccccc"
 
-
         anchors.left: parent.left;
         anchors.right: parent.right;
         anchors.top: parent.verticalCenter;
         anchors.bottom: parent.bottom;
         anchors.margins: 40
-
-        width: 200
-        height:200
 
         ScrollViewVPlay {
             id: scrollView

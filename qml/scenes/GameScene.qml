@@ -18,10 +18,15 @@ SceneBase {
     property string activePlayerId
     property variant activePlayer
     signal playerStopped;
-    signal playerReachedTarget;
+    signal playerReachedTarget;    
 
     property variant activePanel
     signal panelClosed;
+    signal panelOpt1;
+    signal panelOpt2;
+    signal panelOpt3;
+    signal panelOpt4;
+    signal panelOpt5;
 
 
     onActivePlayerIdChanged: storage.savePlayerId(activePlayerId);
@@ -197,69 +202,16 @@ SceneBase {
 
     Connections {
         target: activePanel !== undefined ? activePanel : null
+        onPanelOpt1: panelOpt1();
+        onPanelOpt2: panelOpt2();
+        onPanelOpt3: panelOpt3();
+        onPanelOpt4: panelOpt4();
+        onPanelOpt5: panelOpt5();
         onClose: {panelClosed(); panelLoader.source = '';}
     }
 
-    EntityBase {
-        id: scriptedSequence
-        property var sequence
-
-        onSequenceChanged: loadStates()
-
-        function loadStates() {
-            var states = '';
-            var state = '';
-            var s;
-
-console.log('----------- loading states');
-
-            for(var i = 0; i < sequence.length; i++){
-                s = sequence[i];
-
-                state = 'State {';
-                state += 'name: "'+s.name+'"; '
-
-                switch(s.type){
-                    case 'moveTo':
-                        state += 'StateChangeScript { script: activePlayer.moveTo('+s.x+','+s.y+')} ';
-                        state += 'PropertyChanges { target: gameScene; ';
-
-                        if(s.change && s.change.length){
-                            for(var j = 0; j < s.change.length; j++){
-                                state += s.change[j].on + ': sampleScript.state = "'+s.change[j].to+'"; ';
-                            }
-                        }
-                        state += '} ';
-                        break;
-                    case 'look':
-                        //TODO: escape single quotes
-                        state += 'StateChangeScript { script: {
-                            panelLoader.source = "../interface/MessagePanel.qml";
-                            activePanel.message = "'+s.message+'";
-                        }} ';
-                        state += 'PropertyChanges { target: gameScene; ';
-
-                        if(s.change && s.change.length){
-                            for(var j = 0; j < s.change.length; j++){
-                                state += s.change[j].on + ': sampleScript.state = "'+s.change[j].to+'"; ';
-                            }
-                        }
-                        state += '} ';
-
-                        break;
-                }
-
-                state += '}';
-                if(i < sequence.length-1)
-                    state += ',';
-                states += state;
-            }
-
-            states = 'import QtQuick 2.0; import VPlay 2.0; EntityBase { id: sampleScript
-                onStateChanged: {console.log("-- state changed to "+state)}
-                state: "'+sequence[0].name+'"; states: ['+states+'] }';
-            Qt.createQmlObject(states, scriptedSequence);
-        }
+    Scripted {
+        id: scripted
     }
 
 

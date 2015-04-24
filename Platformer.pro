@@ -36,5 +36,6 @@ ios {
 
 DISTFILES += \
     qml/interface/DialogPanel.qml \
-    qml/interface/InspectPanel.qml
+    qml/common/Scripted.qml \
+    qml/interface/TakePanel.qml
 

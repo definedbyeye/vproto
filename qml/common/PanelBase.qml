@@ -9,7 +9,12 @@ Item {
 
     anchors.fill: parent
 
-    signal close();
+    signal panelOpt1
+    signal panelOpt2
+    signal panelOpt3
+    signal panelOpt4
+    signal panelOpt5
+    signal close
 
     Rectangle {
         anchors.fill: parent
@@ -25,8 +30,7 @@ Item {
     }
 
     function closePanel() {
-        close();
-        panelLoader.source = '';
+        close();        
     }
 
 }

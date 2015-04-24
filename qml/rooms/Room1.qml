@@ -25,38 +25,25 @@ RoomBase {
 
     // interaction areas
 
-    /*
-    Look {
+    InteractableBase {
         areaVertices: [Qt.point(0,0), Qt.point(150, 0), Qt.point(100, 100), Qt.point(0, 200)]
-        message: "This is only a test... bzzzzzp...."        
-    }
-
-    Take {
-        inventoryId: 'emptyGlass'
-        x: 310
-        y: 168
-        width: 32
-        height: 48
-        boxColor: '#cc0011'
-    }
-*/
-    Rectangle {
-        x: 400
-        y: 300
-        width: 50
-        height: 50
-        color: "lightblue"
-        MouseArea {
-            anchors.fill: parent
-            onClicked: {scriptedSequence.sequence = [
-                            {name: 'getCloser', change: [{on: 'onPlayerReachedTarget', to: 'firstLook'}],  type: 'moveTo', x: 190, y: 287},
-                            {name: 'firstLook', change: [{on: 'onPanelClosed', to: 'moveAway'}],           type: 'look',   message: 'It looks big.'},
-                            {name: 'moveAway',  change: [{on: 'onPlayerReachedTarget', to: 'secondLook'}], type: 'moveTo', x: 330, y: 287},
-                            {name: 'secondLook', type: 'look', message: 'Now it looks small.'}
-                        ]}
-
+        onTap: {
+            scripted.sequence = [{name: 'look', type: 'look', message: "... Bzzzzzt.... this is only a test."}]
         }
+    }
 
+    InteractableBase {
+        x: 315
+        y: 161
+        width: 30
+        height: 50
+        helperColor: "pink"
+        onTap: {scripted.sequence = [
+                    {name: 'getCloser', type: 'moveTo', x: 274, y: 270, events: [{on: 'onPlayerReachedTarget', to: 'firstLook'}]},
+                    {name: 'firstLook', type: 'take',   inventoryId: 'emptyGlass', events: [{on: 'onPanelOpt1', to: 'leaveIt'}, {on: 'onPanelOpt2', to: 'takeIt'}]},
+                    {name: 'leaveIt',   type: 'message', message: 'Eh, I\'ll leave it alone for now.'},
+                    {name: 'takeIt',    type: 'message', message: 'I pick it up and put it in my pocket.'}
+                ]}
     }
 
 

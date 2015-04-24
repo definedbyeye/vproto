@@ -7,9 +7,6 @@ import "../common"
 PanelBase {
     id: inspectPanel
 
-    signal leaveIt();
-    signal takeIt();
-
     property string inventoryId: '';
 
     property string name: ''
@@ -84,16 +81,17 @@ PanelBase {
         }
 
         Button {
-            y: 100
-            x: 150
+            y: 90
+            x: 30
             text: "Leave it"
-            onClicked: leaveIt()
+            onClicked: panelOpt1()
         }
 
         Button {
-            y: 100
-            text: "Take it"
-            onClicked: takeIt()
+            y: 90
+            x: 150
+            text: "Take it"            
+            onClicked: {inventoryPanel.addInventory(inventoryId); panelOpt2();}
         }
 
     }

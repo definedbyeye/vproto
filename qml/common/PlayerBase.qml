@@ -54,10 +54,17 @@ EntityBase {
         var fromY = playerBase.y + playerBase.height - 5
         var diffX = toX - fromX
         var diffY = toY - fromY
+
+        //is the player already standing on the point?
+        if(Math.abs(diffY) < 2 && Math.abs(diffX) < 2){
+            targetReached();
+            return;
+        }
+
         var speed = Math.abs(playerBase.speed/Math.sqrt((diffX*diffX) + (diffY*diffY)))
 
         moveToPointHelper.targetPoint = Qt.point(toX, toY)
-        playerCollider.linearVelocity = Qt.point(0,0)
+        playerCollider.linearVelocity = Qt.point(0,0) //stop before changing direction
         playerCollider.linearVelocity = Qt.point(diffX*speed, diffY*speed)
 
         if(playerCollider.linearVelocity.x <= 0 && playerCollider.linearVelocity.y <= 0) {playerBase.direction = "NW"}

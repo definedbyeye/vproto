@@ -3,12 +3,11 @@ import QtQuick 2.4
 import "../common"
 
 
-EntityBase {
-    entityType: "interactableBase"
+Item {
     id: interactable
 
     property int triggerSensitivity: 20
-    property string boxColor: '#fff'
+    property string helperColor: '#fff'
 
     // interactable exposes these events:
     signal swipeUp()
@@ -34,7 +33,7 @@ EntityBase {
 
     Rectangle {
         id: mouseBox
-        color: boxColor
+        color: helperColor
         opacity: .5
         MouseArea {
 
