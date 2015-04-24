@@ -5,11 +5,7 @@ import QtQuick.Controls 1.3
 import "../common"
 
 PanelBase {
-    id: dialogPanel
-
-    //properties
-    onOrientationChanged: console.log('--- new orientation: '+orientation);
-    onProfileChanged: console.log('--- new profile: '+profile);
+    id: dialogPanel    
 
     //TODO: autoAdvance
 
@@ -25,8 +21,7 @@ PanelBase {
         anchors.bottom: parent.bottom;
         anchors.bottomMargin: 40
 
-        Rectangle {
-            Component.onCompleted: console.log('width height: '+width+' '+height);
+        Rectangle {            
             id: imageFrame
 
             width: 100;

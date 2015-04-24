@@ -68,8 +68,7 @@ Item {
         }
     }
 
-    function inArea(mouse) {
-        console.log('---- in area: '+(!(areaVertices.length && !wn_PnPoly(mouse))));
+    function inArea(mouse) {        
         return !(areaVertices.length && !wn_PnPoly(mouse))
     }
 

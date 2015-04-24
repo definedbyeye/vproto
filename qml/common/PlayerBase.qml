@@ -10,9 +10,7 @@ EntityBase {
     property real mediaScale: 1
 
     signal moveStopped
-    signal targetReached
-
-    onTargetReached: console.log('-- player reached target (per playerbase)');
+    signal targetReached    
 
     function isTargetReached() {
         var pX = playerBase.x + playerBase.width/2

@@ -19,7 +19,6 @@ SceneBase {
     property variant activePlayer
     signal playerStopped;
     signal playerReachedTarget;
-    onPlayerReachedTarget: console.log('-- player reached target (per gamescene)');
 
     property variant activePanel
     signal panelClosed;
@@ -29,9 +28,6 @@ SceneBase {
     signal panelOpt4;
     signal panelOpt5;
     signal panelOptCancel;
-
-    onPanelClosed: console.log('--- gamescene panel closed');
-
 
     onActivePlayerIdChanged: storage.savePlayerId(activePlayerId);
     onActiveRoomIdChanged: storage.saveRoomId(activeRoomId);

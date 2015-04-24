@@ -11,8 +11,6 @@ EntityBase {
         var state = '';
         var s;
 
-console.log('----------- loading states');
-
         for(var i = 0; i < sequence.length; i++){
             s = sequence[i];
 
@@ -23,8 +21,7 @@ console.log('----------- loading states');
                 case 'moveTo':
                     state += 'StateChangeScript { script: activePlayer.moveTo('+s.x+','+s.y+')} ';
                     state += 'PropertyChanges { target: gameScene; ';
-                    state += parseEvents(s.events);
-                    //state += 'onPlayerReachedTarget: {console.log("-- scripted says player reached target"); thisScript.state="firstLook";} '
+                    state += parseEvents(s.events);                    
                     state += '} ';                    
                     break;
                 case 'message':
@@ -34,8 +31,7 @@ console.log('----------- loading states');
                         activePanel.message = "'+s.message+'";
                     }} ';
                     state += 'PropertyChanges { target: gameScene; ';
-                    state += parseEvents(s.events);
-                    //state += 'onPanelClosed: console.log("-- scripted says panel closed");'
+                    state += parseEvents(s.events);                    
                     state += '} ';
                     break;
                 case 'take':
@@ -56,8 +52,7 @@ console.log('----------- loading states');
                         +parseDialogOpts(s.events)+'
                     }} ';
                     state += 'PropertyChanges { target: gameScene; ';
-                    state += parseEvents(s.events);
-                    //state += 'onPanelClosed: console.log("-- scripted says panel closed");'
+                    state += parseEvents(s.events);                    
                     state += '} ';                    
                     break;
                 case 'addInventory':
