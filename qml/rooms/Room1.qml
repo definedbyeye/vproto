@@ -28,9 +28,31 @@ RoomBase {
     InteractableBase {
         areaVertices: [Qt.point(0,0), Qt.point(150, 0), Qt.point(100, 100), Qt.point(0, 200)]
         onTap: {
-            scripted.sequence = [{name: 'look', type: 'look', message: "... Bzzzzzt.... this is only a test."}]
+            scripted.sequence = [{name: 'look', type: 'message', message: "... Bzzzzzt.... this is only a test."}]
         }
     }
+
+
+    InteractableBase {
+        x: 420
+        y: 175
+        width: 30
+        height: 30
+        helperColor: "lightblue"
+        onTap: {scripted.sequence = [
+                    {name: 'd1', type: 'dialog', orientation: 'left',  profile: 'player', message: 'Hello!', events: [{on: 'onPanelClosed', to: 'd2'}]},
+                    {name: 'd2', type: 'dialog', orientation: 'right', profile: 'player', message: 'Who, me?', events: [{on: 'onPanelClosed', to: 'd3'}]},
+                    {name: 'd3', type: 'dialog', orientation: 'left',  profile: 'player', message: 'I think I\'m talking to myself...', events: [{on: 'onPanelClosed', to: 'd4'}]},
+                    {name: 'd4', type: 'dialog', orientation: 'right', profile: 'player', message: 'I\'ll respond with...', events: [
+                            {on: 'onPanelOpt1', message: 'Really?', to: 'd3'},
+                            {on: 'onPanelOpt2', message: 'Really really?', to: 'd5'},
+                            {on: 'onPanelOptCancel', message: 'Forget it.'},
+                        ]},
+                    {name: 'd5', type: 'dialog', orientation: 'left', profile: 'player', message: 'Its confirmed. I\'m talking to myself.'}
+                ]}
+    }
+
+
 
     InteractableBase {
         x: 315
@@ -44,6 +66,25 @@ RoomBase {
                     {name: 'leaveIt',   type: 'message', message: 'Eh, I\'ll leave it alone for now.'},
                     {name: 'takeIt',    type: 'message', message: 'I pick it up and put it in my pocket.'}
                 ]}
+    }
+
+
+    Rectangle {
+        x: 400
+        y: 300
+        width: 50
+        height: 50
+        color: "lightblue"
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {scripted.sequence = [
+                            {name: 'getCloser', events: [{on: 'onPlayerReachedTarget', to: 'firstLook'}],  type: 'moveTo', x: 346, y: 337},
+                            {name: 'firstLook', events: [{on: 'onPanelClosed', to: 'moveAway'}],           type: 'message',   message: 'It looks big.'},
+                            {name: 'moveAway',  events: [{on: 'onPlayerReachedTarget', to: 'secondLook'}], type: 'moveTo', x: 330, y: 287},
+                            {name: 'secondLook', type: 'message', message: 'Now it looks small.'}
+                        ]}
+
+        }
     }
 
 

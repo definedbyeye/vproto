@@ -18,7 +18,8 @@ SceneBase {
     property string activePlayerId
     property variant activePlayer
     signal playerStopped;
-    signal playerReachedTarget;    
+    signal playerReachedTarget;
+    onPlayerReachedTarget: console.log('-- player reached target (per gamescene)');
 
     property variant activePanel
     signal panelClosed;
@@ -27,6 +28,9 @@ SceneBase {
     signal panelOpt3;
     signal panelOpt4;
     signal panelOpt5;
+    signal panelOptCancel;
+
+    onPanelClosed: console.log('--- gamescene panel closed');
 
 
     onActivePlayerIdChanged: storage.savePlayerId(activePlayerId);
@@ -172,11 +176,11 @@ SceneBase {
         Connections {
             target: activePlayer !== undefined ? activePlayer : null
             onMoveStopped: {
-                playerStopped();
+                gameScene.playerStopped();
                 storage.savePlayerPoint(Qt.point(target.x, target.y));
             }
             onTargetReached: {
-                playerReachedTarget();
+                gameScene.playerReachedTarget();
             }
             onYChanged: updatePlayerScale();
             onXChanged: updateRoomOffset();
@@ -207,7 +211,8 @@ SceneBase {
         onPanelOpt3: panelOpt3();
         onPanelOpt4: panelOpt4();
         onPanelOpt5: panelOpt5();
-        onClose: {panelClosed(); panelLoader.source = '';}
+        onPanelOptCancel: panelOptCancel();
+        onClose: {panelLoader.source = ''; gameScene.panelClosed();}
     }
 
     Scripted {

@@ -7,14 +7,28 @@ import "../common"
 Item {
     id: panel
 
-    anchors.fill: parent
+    anchors.fill: parent    
 
     signal panelOpt1
     signal panelOpt2
     signal panelOpt3
     signal panelOpt4
     signal panelOpt5
+    signal panelOptCancel
     signal close
+
+    property string name;
+    property string message;
+
+    property string orientation: 'left'
+    property string profile: ''
+
+    property string opt1Message
+    property string opt2Message
+    property string opt3Message
+    property string opt4Message
+    property string opt5Message
+    property string optCancelMessage
 
     Rectangle {
         anchors.fill: parent

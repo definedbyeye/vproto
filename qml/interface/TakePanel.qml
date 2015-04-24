@@ -7,16 +7,13 @@ import "../common"
 PanelBase {
     id: inspectPanel
 
-    property string inventoryId: '';
-
-    property string name: ''
-    property string description: ''
+    property string inventoryId;
 
     onInventoryIdChanged: {
         var inventoryItem = storage.getInventoryItem(inventoryId);
         if(inventoryItem){
             name = inventoryItem.name
-            description = inventoryItem.description
+            message = inventoryItem.description
         }
     }
 
@@ -72,7 +69,7 @@ PanelBase {
             flickableItem.flickableDirection: Flickable.VerticalFlick
 
             Text {
-                text: description
+                text: message
                 anchors.top: parent.top
                 anchors.left: parent.left
                 color: '#000'

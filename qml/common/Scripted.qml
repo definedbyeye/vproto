@@ -24,7 +24,8 @@ console.log('----------- loading states');
                     state += 'StateChangeScript { script: activePlayer.moveTo('+s.x+','+s.y+')} ';
                     state += 'PropertyChanges { target: gameScene; ';
                     state += parseEvents(s.events);
-                    state += '} ';
+                    //state += 'onPlayerReachedTarget: {console.log("-- scripted says player reached target"); thisScript.state="firstLook";} '
+                    state += '} ';                    
                     break;
                 case 'message':
                     //TODO: escape single quotes
@@ -34,6 +35,7 @@ console.log('----------- loading states');
                     }} ';
                     state += 'PropertyChanges { target: gameScene; ';
                     state += parseEvents(s.events);
+                    //state += 'onPanelClosed: console.log("-- scripted says panel closed");'
                     state += '} ';
                     break;
                 case 'take':
@@ -44,6 +46,19 @@ console.log('----------- loading states');
                     state += 'PropertyChanges { target: gameScene; ';
                     state += parseEvents(s.events);
                     state += '} ';
+                    break;
+                case 'dialog':
+                    state += 'StateChangeScript { script: {
+                        panelLoader.source = "../interface/DialogPanel.qml";
+                        activePanel.message = "'+s.message+'";
+                        activePanel.orientation = "'+s.orientation+'";
+                        activePanel.profile = "'+s.profile+'"; '
+                        +parseDialogOpts(s.events)+'
+                    }} ';
+                    state += 'PropertyChanges { target: gameScene; ';
+                    state += parseEvents(s.events);
+                    //state += 'onPanelClosed: console.log("-- scripted says panel closed");'
+                    state += '} ';                    
                     break;
                 case 'addInventory':
                     break;
@@ -62,12 +77,26 @@ console.log('----------- loading states');
     }
 
     function parseEvents(changeEvents){
-        var events = '';
+        var e = '';
         if(changeEvents && changeEvents.length){
             for(var j = 0; j < changeEvents.length; j++){
-                events += changeEvents[j].on + ': thisScript.state = "'+changeEvents[j].to+'"; ';
+                e += changeEvents[j].on + ': thisScript.state = "'+changeEvents[j].to+'"; ';
+            }
+        }        
+        return e;
+    }
+
+    function parseDialogOpts(changeEvents){
+        var opts = '';
+        if(changeEvents && changeEvents.length){
+            for(var j = 0; j < changeEvents.length; j++){
+                if(changeEvents[j].on === 'onPanelOptCancel') {
+                    opts += 'activePanel.optCancelMessage = "'+(changeEvents[j].message || '')+'";';
+                } else {
+                    opts += 'activePanel.opt'+(j+1)+'Message = "'+(changeEvents[j].message || '')+'";';
+                }
             }
         }
-        return events;
+        return opts;
     }
 }
