@@ -5,9 +5,7 @@ import QtQuick.Controls 1.3
 import "../common"
 
 PanelBase {
-    id: messagePanel
-
-    property string message: 'default text';
+    id: messagePanel    
 
     anchors.fill: parent
 

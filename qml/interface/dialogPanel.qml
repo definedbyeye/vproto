@@ -7,31 +7,11 @@ import "../common"
 PanelBase {
     id: dialogPanel
 
-
-    //state for image and description?  click to advance state, or auto-advance speed (per settings)
-    /*{
-        message: optional,  //simple look
-        orientation: 'topLeft',
-
-        characterImage: '' //character dialog
-        options: [{
-             text: '',
-             toTopic: dialogIndex,
-        }]
-    }*/
-    property var dialog: []
-    property int activeDialog: '';
-
     //properties
-    property string orientation: 'topLeft'
-    property string title: '';    
-    property string message: ''
+    onOrientationChanged: console.log('--- new orientation: '+orientation);
+    onProfileChanged: console.log('--- new profile: '+profile);
 
-    property string imageSource: '';
-    property int imageHeight: 0;
-    property int imageWidth: 0;
-
-    //autoAdvance
+    //TODO: autoAdvance
 
     Rectangle {
         id: dialogFrame
@@ -45,27 +25,29 @@ PanelBase {
         anchors.bottom: parent.bottom;
         anchors.bottomMargin: 40
 
-        //only used for dialogs and inventory, optional for messages
         Rectangle {
+            Component.onCompleted: console.log('width height: '+width+' '+height);
             id: imageFrame
 
-            width: imageWidth ? Math.min(imageWidth+10, 100) : 0;
-            height: imageHeight ? Math.min(imageHeight+10, 200) : 0;
-            color: "#ccc";
+            width: 100;
+            height: 200;
+            //color: "lightgreen";
 
-            x: - 10
+            x: orientation === 'left' ? -10 : 300
             y: -imageFrame.height/3;
 
+
             MultiResolutionImage {
-                source: imageSource;
-                width: imageWidth;
-                height: imageHeight;
-                anchors.centerIn: parent
+                source: profile ? '../../assets/player/'+profile+'.png' : ''
+                width: 23;
+                height: 50;
+                anchors.top: imageFrame.top
+                anchors.left: imageFrame.left
             }
+
         }
 
         Text {
-            text: title
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.leftMargin: imageFrame.width + 5
@@ -76,9 +58,9 @@ PanelBase {
         ScrollViewVPlay {
             id: scrollView
             anchors.fill: parent
-            anchors.topMargin: title ? 25 : 10
-            anchors.leftMargin: imageFrame.width + 5
-            anchors.rightMargin: 10
+            anchors.topMargin: name ? 25 : 10
+            anchors.leftMargin: orientation === 'left' ? imageFrame.width + 5 : 10
+            anchors.rightMargin: orientation !== 'left' ? imageFrame.width + 5 : 10
             anchors.bottomMargin: 10
 
             flickableItem.interactive: true
@@ -93,6 +75,60 @@ PanelBase {
             }
 
         }
+
+        Button {
+            id: opt1
+            x: 0
+            y: 90
+            visible: (!!opt1Message)
+            text: opt1Message
+            onClicked: {activePanel.close(); panelOpt1()}
+        }
+
+        Button {
+            id: opt2
+            x: 50
+            y: 90
+            visible: (!!opt2Message)
+            text: opt2Message
+            onClicked: {activePanel.close(); panelOpt2()}
+        }
+
+        Button {
+            id: opt3
+            x: 100
+            y: 90
+            visible: (!!opt3Message)
+            text: opt3Message
+            onClicked: {activePanel.close(); panelOpt3()}
+        }
+
+        Button {
+            id: opt4
+            visible: (!!opt4Message)
+            text: opt4Message
+            onClicked: {activePanel.close(); panelOpt4()}
+        }
+
+        Button {
+            x: 150
+            y: 90
+            id: opt5
+            visible: (!!opt5Message)
+            text: opt5Message
+            onClicked: {activePanel.close(); panelOpt5()}
+        }
+
+        Button {
+            id: optCancel
+            x: 200
+            y: 90
+            visible: (!!optCancelMessage)
+            text: optCancelMessage
+            onClicked: {activePanel.close(); panelOptCancel()}
+        }
+
+
     }
 
 
@@ -103,42 +139,4 @@ PanelBase {
     function prev() {
         setDialog(activeDialog - 1);
     }
-
-
-    /*{
-        orientation: 'topLeft',
-
-        inventoryId: optional,  //inventory panel
-
-        characterImage: '' //character dialog
-        message: optional,
-        options: [{
-             text: '',
-             toIndex: dialogIndex,
-        }]
-    }*/
-
-    function setDialog(index){
-        var d = dialog[index];
-        if(activeDialog !== index && d) {
-            activeDialog = index;
-
-            orientation = d.orientation || d;
-
-            message = d.message || message;
-
-            if(d.characterImage) {
-                imageSource = d.characterImage;
-                imageWidth = 100;
-                imageHeight = 200;
-            }
-
-            if(options && options.length){
-
-            }
-
-
-        }
-    }
-
 }

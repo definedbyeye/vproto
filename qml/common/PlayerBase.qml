@@ -12,6 +12,8 @@ EntityBase {
     signal moveStopped
     signal targetReached
 
+    onTargetReached: console.log('-- player reached target (per playerbase)');
+
     function isTargetReached() {
         var pX = playerBase.x + playerBase.width/2
         var pY = playerBase.y + playerBase.height - 5

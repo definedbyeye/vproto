@@ -36,7 +36,7 @@ SceneBase {
             onClicked: continueGamePressed()
         }
         MenuButton {
-            text: "Roadmap"
+            text: "Road Map"
             onClicked: creditsPressed()
         }
 

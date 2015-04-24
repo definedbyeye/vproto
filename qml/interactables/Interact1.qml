@@ -68,6 +68,6 @@ InteractableBase {
             to: {"freeze":1}
         }
 
-    }
+    }    
 
 }
