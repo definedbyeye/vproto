@@ -15,9 +15,6 @@ InteractableBase {
     onSwipeRight: {if(sprite.spriteSequence.currentSprite !== "empty") sprite.jumpTo("boil")}
     onSwipeLeft: {if(sprite.spriteSequence.currentSprite !== "empty") sprite.jumpTo("freeze")}
 
-    onHold: {console.log('---- add glass to inventory'); inventoryPanel.addInventory('fullGlass');}
-    //onDoubleClicked: inventoryPanel.addInventory(1)
-
     SpriteSequenceVPlay {
         id: sprite
         anchors.fill: parent
