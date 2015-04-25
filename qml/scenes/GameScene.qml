@@ -121,7 +121,7 @@ SceneBase {
     Item {
         id: viewPort
 
-        property alias dragActiveInventory: activeInventory
+        property alias dragActiveInventory: activeInventoryCollider
 
         height: activeRoom ? activeRoom.height : gameScene.height;
         width: activeRoom ? activeRoom.width: gameScene.width;
@@ -194,12 +194,11 @@ SceneBase {
         }
 
         EntityBaseDraggable {
-          id: activeInventory
+          id: activeInventoryCollider
           entityId: "test"
           entityType: "block"
 
-          x: 300
-          y: 275
+          visible: false;
 
           signal dropped;
 
@@ -269,27 +268,71 @@ SceneBase {
         height: 50
 
         color: "pink"
-        opacity: .7
+        opacity: .6
         radius: width*0.5
 
         Rectangle {
-            id: sampleInv
+            id: activeInventory
             width: 50
             height: 50
             radius: 25
             color: "blue"
+            Drag.active: dragFromFrame.drag.active
+
+            anchors {
+                horizontalCenter: parent.horizontalCenter;
+                verticalCenter: parent.verticalCenter
+            }
+
+            property bool dragging: false
+
+            states: [
+                State {
+                    when: activeInventory.dragging
+                    PropertyChanges {target: activeInventory; color: "green"}
+                    AnchorChanges {
+                        target: activeInventory;
+                        anchors.horizontalCenter: undefined;
+                        anchors.verticalCenter: undefined;
+                    }
+                }
+
+            ]
         }
 
         MouseArea {
-            id: dragArea
+            id: dragFromFrame
             anchors.fill: parent
-            drag.target: viewPort.dragActiveInventory
+
+            Component.onCompleted: reset()
+
             onPressed: {
-                console.log('framex: '+activeInventoryFrame.x+' viewPortx: '+mapToItem(viewPort, mouse.x, mouse.y).x)
-                viewPort.dragActiveInventory.x = mapToItem(viewPort, mouse.x, mouse.y).x;
-                viewPort.dragActiveInventory.y = mapToItem(viewPort, mouse.x, mouse.y).y;
+                follow(mouse);
+                viewPort.dragActiveInventory.visible = true;
+                activeInventory.dragging = true;
             }
-            onReleased: viewPort.dragActiveInventory.dropped()
+            onReleased: {
+                activeInventory.dragging = false;
+                viewPort.dragActiveInventory.dropped();
+                viewPort.dragActiveInventory.visible = false;
+                reset();
+            }
+            onPositionChanged: follow(mouse);
+
+
+            function follow(mouse){
+                var vp = mapToItem(viewPort, mouse.x, mouse.y);
+                viewPort.dragActiveInventory.x = vp.x;
+                viewPort.dragActiveInventory.y = vp.y;
+                activeInventory.x = mouse.x - activeInventory.width/2;
+                activeInventory.y = mouse.y - activeInventory.height/2;
+            }
+
+            function reset(){
+                var vp = mapToItem(viewPort, activeInventory.x+activeInventory.width/2, activeInventory.y+activeInventory.height/2);
+                viewPort.dragActiveInventory.x = vp.x;
+                viewPort.dragActiveInventory.y = vp.y;
+            }
         }
     }
 
