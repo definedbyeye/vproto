@@ -121,13 +121,15 @@ SceneBase {
     Item {
         id: viewPort
 
+        property alias dragActiveInventory: activeInventory
+
         height: activeRoom ? activeRoom.height : gameScene.height;
         width: activeRoom ? activeRoom.width: gameScene.width;
 
         PhysicsWorld {
             id: physicsWorld
             gravity: Qt.point(0,0)
-            debugDrawVisible: false // enable this for physics debugging
+            debugDrawVisible: true // enable this for physics debugging
             z: 1000
         }
 
@@ -146,9 +148,6 @@ SceneBase {
             }
 
         }
-
-
-
 
         // load levels at runtime
         Loader {
@@ -195,115 +194,39 @@ SceneBase {
         }
 
         EntityBaseDraggable {
-                id: test
-              entityType: "block"
-              entityId: "test"
-
-              x: 300
-              y: 275
-
-              //anchors.bottom: gameScene.bottom
-              //anchors.verticalCenter: gameScene.verticalCenter
-
-              property string inventoryId: "testId"
-
-              selectionMouseArea.anchors.fill: rectangle
-
-              signal dropped;
-
-              onEntityPressed: {}
-              onEntityReleased: {dropped(); }
-
-              // these 2 properties would not need to be set explicitly, because there is a Scene component with id scene
-              //gridSize: scene.gridSize
-              //colliderSize: gridSize
-
-              Rectangle {
-                id: rectangle
-                width: 32
-                height: 32
-                // NOTE: it is important that the entity position is the center of the visuals
-                anchors.centerIn: parent
-                color: "brown"
-              }
-
-              BoxCollider {
-                id: collider
-                anchors.fill: rectangle
-                categories: Box.Category4
-                collidesWith: Box.Category5
-                collisionTestingOnlyMode: true
-              }
-            }
-
-
-    }
-
-/*
-
-        EntityBaseDraggable {
           id: activeInventory
-          entityId: 'activeInventory'
+          entityId: "test"
           entityType: "block"
 
-          x: 240
-          y: 200
-          //anchors.bottom: gameScene.bottom
-          //anchors.verticalCenter: gameScene.verticalCenter
-
-          property string vcolor: "green"
+          x: 300
+          y: 275
 
           signal dropped;
-          property bool dragging: false
 
-          property string inventoryId: 'testInventory'
+          property string inventoryId: "testId"
 
-          selectionMouseArea.anchors.fill: visual           //required for EntityBaseDraggable
-          dragOffset: Qt.point(0,-5)                        //offset while dragging
-
-          onEntityPressed: {dragging = true;}
-          onEntityReleased: {dragging = false; dropped(); x=240; y=200;}
-
-          colliderComponent: collider
-          colliderCategoriesWhileDragged: Box.Category4
-          colliderCollidesWithWhileDragged: Box.Category5
-          colliderSize: 50
-
-          // if drop accepted, animate item in frame back up and do not snap item back
-          // if drop not accepted, animate empty frame back up and snap item back ?
+          selectionMouseArea.anchors.fill: rectangle
+          dragOffset: Qt.point(0,-5)
 
           Rectangle {
-            id: visual
-            width: 50
-            height: 50
-            radius: width/2;
+            id: rectangle
+            width: 32
+            height: 32
+            radius: 16
             anchors.centerIn: parent
-            color: activeInventory.vcolor
+            color: "brown"
           }
 
-          // TODO: may not need to be a circle
-          CircleCollider {
+          BoxCollider {
             id: collider
+            anchors.fill: rectangle
             categories: Box.Category4
             collidesWith: Box.Category5
-            radius: visual.width/2
-            anchors.top: visual.top
-            anchors.left: visual.left
             collisionTestingOnlyMode: true
           }
-
-          states: [
-              State {
-                  when: activeInventory.dragging
-                  PropertyChanges {target: activeInventory; vcolor: "blue"}
-                  ParentChange {target: activeInventory; parent: viewPort}
-              }
-          ]
-
         }
 
-*/
-
+    }
 
     InventoryPanel {
         id: inventoryPanel
@@ -331,9 +254,9 @@ SceneBase {
         onPanelOpt5: panelOpt5();
         onPanelOptCancel: panelOptCancel();
         onClose: {panelLoader.source = ''; gameScene.panelClosed();}
-    }
+    }   
 
-    //container allows draggable to snap back
+    //activeInventoryFrame
     Rectangle {
         id: activeInventoryFrame
 
@@ -348,9 +271,27 @@ SceneBase {
         color: "pink"
         opacity: .7
         radius: width*0.5
+
+        Rectangle {
+            id: sampleInv
+            width: 50
+            height: 50
+            radius: 25
+            color: "blue"
+        }
+
+        MouseArea {
+            id: dragArea
+            anchors.fill: parent
+            drag.target: viewPort.dragActiveInventory
+            onPressed: {
+                console.log('framex: '+activeInventoryFrame.x+' viewPortx: '+mapToItem(viewPort, mouse.x, mouse.y).x)
+                viewPort.dragActiveInventory.x = mapToItem(viewPort, mouse.x, mouse.y).x;
+                viewPort.dragActiveInventory.y = mapToItem(viewPort, mouse.x, mouse.y).y;
+            }
+            onReleased: viewPort.dragActiveInventory.dropped()
+        }
     }
-
-
 
 
     Scripted {
