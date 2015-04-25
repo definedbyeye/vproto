@@ -22,6 +22,5 @@ Item {
       player.x = defaultPlayerPoint.x;
       player.y = defaultPlayerPoint.y;
   }
-
 }
 

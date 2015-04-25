@@ -19,9 +19,14 @@ Item {
     signal doubleTap()
     signal hold()    
 
+    signal useWith()
+
+    onUseWith: console.log('----------------- use with '+useWithInventoryId);
+
     //optional for odd shaped areas
     property var areaVertices: [];
 
+    property string useWithInventoryId;
 
     Component.onCompleted: initArea();
 
@@ -33,18 +38,50 @@ Item {
 
     Rectangle {
         id: mouseBox
+
         color: helperColor
         opacity: .5
+        anchors.fill: interactable
+
+        //detects when active inventory is dropped on this
+        //TODO: polygon collider (counter-clockwise vertices?)
+        BoxCollider {
+          id: boxCollider
+          x: interactable.x
+          y: interactable.y
+          width: interactable.width
+          height: interactable.height
+
+          anchors.fill: interactable
+
+          collisionTestingOnlyMode: true
+          categories: Box.Category5
+          collidesWith: Box.Category4
+
+          property var collidedEntity;
+
+          fixture.onBeginContact: {
+            collidedEntity = other.parent.parent.parent;
+            collidedEntity.dropped.connect(useWith);
+            interactable.useWithInventoryId = collidedEntity.inventoryId;
+          }
+
+          fixture.onEndContact: {
+            collidedEntity.dropped.disconnect(useWith);
+            interactable.useWithInventoryId = '';
+          }
+        }
+
+
         MouseArea {
-
             anchors.fill: parent
-
             onReleased: if(inArea(mouse)) triggerSwipe(mouse)
             onClicked: if(inArea(mouse)) tap()
             onDoubleClicked: if(inArea(mouse)) doubleTap()
             onPressAndHold: if(inArea(mouse)) hold()
         }
-    }
+    }                
+
 
     //only triggers a swipe if the mouse has traveled > 20
     function triggerSwipe (mouse) {
@@ -88,14 +125,14 @@ Item {
                 maxY = Math.max(maxY, v.y);
             }
 
-            mouseBox.x = minX;
-            mouseBox.y = minY;
-            mouseBox.width = maxX-minX;
-            mouseBox.height = maxY-minY;                        
+            interactable.x = minX;
+            interactable.y = minY;
+            interactable.width = maxX-minX;
+            interactable.height = maxY-minY;
 
         } else {
 
-            mouseBox.anchors.fill = interactable;
+            //mouseBox.anchors.fill = interactable;
 
         }
     }

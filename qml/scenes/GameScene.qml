@@ -5,6 +5,16 @@ import "../interactables"
 import "../rooms"
 import "../interface"
 
+/* Collider Categories:
+   Box.Category1 -- Player
+   Box.Category2 -- Wall
+   Box.Category3 -- Area
+   Box.Category4 -- ActiveInventory
+   Box.Category5 -- InteractiveHotspot
+*/
+
+
+
 SceneBase {
     id: gameScene
 
@@ -151,7 +161,7 @@ SceneBase {
             }
         }
 
-        // we connect the gameScene to the loaded level
+        // we connect the gameScene to the loaded room
         Connections {
             // only connect if a level is loaded, to prevent errors
             target: activeRoom !== undefined ? activeRoom : null        
@@ -159,7 +169,7 @@ SceneBase {
                 setRoom(target.goToRoomId, target.fromAreaId);
                 updatePlayerScale();
             }
-        }
+        }        
 
         Loader {
             id: playerLoader
@@ -181,7 +191,54 @@ SceneBase {
             onYChanged: updatePlayerScale();
             onXChanged: updateRoomOffset();
         }
+
+
     }
+
+    EntityBaseDraggable {
+      id: activeInventory
+      entityId: 'activeInventory'
+      entityType: "block"
+
+      //x: 240
+      //y: 332
+      anchors.bottom: gameScene.bottom
+      anchors.verticalCenter: gameScene.verticalCenter
+
+      signal dropped;
+
+      property string inventoryId: 'testInventory'
+
+      selectionMouseArea.anchors.fill: visual           //required for EntityBaseDraggable
+      dragOffset: Qt.point(0,-5)                        //offset while dragging
+
+      onEntityReleased: {dropped(); x=240; y=332;}
+
+      // if drop accepted, animate item in frame back up and do not snap item back
+      // if drop not accepted, animate empty frame back up and snap item back ?
+
+      Rectangle {
+        id: visual
+        width: 50
+        height: 50
+        radius: width/2;
+        anchors.centerIn: parent
+        color: "brown"
+      }
+
+      // TODO: may not need to be a circle
+      CircleCollider {
+        id: collider
+        categories: Box.Category4
+        collidesWith: Box.Category5
+        radius: visual.width/2
+        anchors.top: visual
+        anchors.left: visual
+        collisionTestingOnlyMode: true
+      }
+    }
+
+
 
     InventoryPanel {
         id: inventoryPanel
@@ -210,6 +267,26 @@ SceneBase {
         onPanelOptCancel: panelOptCancel();
         onClose: {panelLoader.source = ''; gameScene.panelClosed();}
     }
+
+    //container allows draggable to snap back
+    Rectangle {
+        id: activeInventoryFrame
+
+        property string inventoryId;
+
+        x: gameScene.width/2 - 25
+        y: gameScene.height - 50
+
+        width: 50;
+        height: 50
+
+        color: "pink"
+        opacity: .7
+        radius: width*0.5
+    }
+
+
+
 
     Scripted {
         id: scripted

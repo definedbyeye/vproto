@@ -5,8 +5,8 @@ PolygonCollider {
 
     signal entered
 
-    categories: Box.Category3
-    collidesWith: Box.Category1 //player
+    categories: Box.Category3   // area
+    collidesWith: Box.Category1 // player
 
     // the BoxCollider will not be affected by gravity or other applied physics forces
     collisionTestingOnlyMode: true
@@ -14,6 +14,7 @@ PolygonCollider {
     vertices: []
 
     fixture.onBeginContact: {
+        console.log('----- entered area')
         entered();
     }
 

@@ -34,8 +34,8 @@ RoomBase {
 
 
     InteractableBase {
-        x: 420
-        y: 175
+        x: 161
+        y: 65
         width: 30
         height: 30
         helperColor: "lightblue"
@@ -86,7 +86,6 @@ RoomBase {
 
         }
     }
-
 
     // transition areas
     Area {
@@ -145,4 +144,5 @@ RoomBase {
             Qt.point(1145, 355) // top right
         ]
     }
+
 }
