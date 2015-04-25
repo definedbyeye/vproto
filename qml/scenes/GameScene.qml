@@ -127,7 +127,7 @@ SceneBase {
         PhysicsWorld {
             id: physicsWorld
             gravity: Qt.point(0,0)
-            debugDrawVisible: true // enable this for physics debugging
+            debugDrawVisible: false // enable this for physics debugging
             z: 1000
         }
 
@@ -146,6 +146,8 @@ SceneBase {
             }
 
         }
+
+
 
 
         // load levels at runtime
@@ -192,52 +194,115 @@ SceneBase {
             onXChanged: updateRoomOffset();
         }
 
+        EntityBaseDraggable {
+                id: test
+              entityType: "block"
+              entityId: "test"
+
+              x: 300
+              y: 275
+
+              //anchors.bottom: gameScene.bottom
+              //anchors.verticalCenter: gameScene.verticalCenter
+
+              property string inventoryId: "testId"
+
+              selectionMouseArea.anchors.fill: rectangle
+
+              signal dropped;
+
+              onEntityPressed: {}
+              onEntityReleased: {dropped(); }
+
+              // these 2 properties would not need to be set explicitly, because there is a Scene component with id scene
+              //gridSize: scene.gridSize
+              //colliderSize: gridSize
+
+              Rectangle {
+                id: rectangle
+                width: 32
+                height: 32
+                // NOTE: it is important that the entity position is the center of the visuals
+                anchors.centerIn: parent
+                color: "brown"
+              }
+
+              BoxCollider {
+                id: collider
+                anchors.fill: rectangle
+                categories: Box.Category4
+                collidesWith: Box.Category5
+                collisionTestingOnlyMode: true
+              }
+            }
+
 
     }
 
-    EntityBaseDraggable {
-      id: activeInventory
-      entityId: 'activeInventory'
-      entityType: "block"
+/*
 
-      //x: 240
-      //y: 332
-      anchors.bottom: gameScene.bottom
-      anchors.verticalCenter: gameScene.verticalCenter
+        EntityBaseDraggable {
+          id: activeInventory
+          entityId: 'activeInventory'
+          entityType: "block"
 
-      signal dropped;
+          x: 240
+          y: 200
+          //anchors.bottom: gameScene.bottom
+          //anchors.verticalCenter: gameScene.verticalCenter
 
-      property string inventoryId: 'testInventory'
+          property string vcolor: "green"
 
-      selectionMouseArea.anchors.fill: visual           //required for EntityBaseDraggable
-      dragOffset: Qt.point(0,-5)                        //offset while dragging
+          signal dropped;
+          property bool dragging: false
 
-      onEntityReleased: {dropped(); x=240; y=332;}
+          property string inventoryId: 'testInventory'
 
-      // if drop accepted, animate item in frame back up and do not snap item back
-      // if drop not accepted, animate empty frame back up and snap item back ?
+          selectionMouseArea.anchors.fill: visual           //required for EntityBaseDraggable
+          dragOffset: Qt.point(0,-5)                        //offset while dragging
 
-      Rectangle {
-        id: visual
-        width: 50
-        height: 50
-        radius: width/2;
-        anchors.centerIn: parent
-        color: "brown"
-      }
+          onEntityPressed: {dragging = true;}
+          onEntityReleased: {dragging = false; dropped(); x=240; y=200;}
 
-      // TODO: may not need to be a circle
-      CircleCollider {
-        id: collider
-        categories: Box.Category4
-        collidesWith: Box.Category5
-        radius: visual.width/2
-        anchors.top: visual
-        anchors.left: visual
-        collisionTestingOnlyMode: true
-      }
-    }
+          colliderComponent: collider
+          colliderCategoriesWhileDragged: Box.Category4
+          colliderCollidesWithWhileDragged: Box.Category5
+          colliderSize: 50
 
+          // if drop accepted, animate item in frame back up and do not snap item back
+          // if drop not accepted, animate empty frame back up and snap item back ?
+
+          Rectangle {
+            id: visual
+            width: 50
+            height: 50
+            radius: width/2;
+            anchors.centerIn: parent
+            color: activeInventory.vcolor
+          }
+
+          // TODO: may not need to be a circle
+          CircleCollider {
+            id: collider
+            categories: Box.Category4
+            collidesWith: Box.Category5
+            radius: visual.width/2
+            anchors.top: visual.top
+            anchors.left: visual.left
+            collisionTestingOnlyMode: true
+          }
+
+          states: [
+              State {
+                  when: activeInventory.dragging
+                  PropertyChanges {target: activeInventory; vcolor: "blue"}
+                  ParentChange {target: activeInventory; parent: viewPort}
+              }
+          ]
+
+        }
+
+*/
 
 
     InventoryPanel {

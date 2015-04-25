@@ -61,7 +61,9 @@ Item {
           property var collidedEntity;
 
           fixture.onBeginContact: {
+
             collidedEntity = other.parent.parent.parent;
+              console.log('----------------- collision! inventoryId: '+collidedEntity.inventoryId);
             collidedEntity.dropped.connect(useWith);
             interactable.useWithInventoryId = collidedEntity.inventoryId;
           }
