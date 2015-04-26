@@ -58,18 +58,17 @@ Item {
           categories: Box.Category5
           collidesWith: Box.Category4
 
-          property var collidedEntity;
+          property var collidedCollider;
 
           fixture.onBeginContact: {
-
-            collidedEntity = other.parent.parent.parent;
-              console.log('----------------- collision! inventoryId: '+collidedEntity.inventoryId);
-            collidedEntity.dropped.connect(useWith);
-            interactable.useWithInventoryId = collidedEntity.inventoryId;
+            collidedCollider = other.parent.parent;
+              console.log('----------------- collision! inventoryId: '+collidedCollider.inventoryId);
+            collidedCollider.dropped.connect(useWith);
+            interactable.useWithInventoryId = collidedCollider.inventoryId;
           }
 
           fixture.onEndContact: {
-            collidedEntity.dropped.disconnect(useWith);
+            collidedCollider.dropped.disconnect(useWith);
             interactable.useWithInventoryId = '';
           }
         }

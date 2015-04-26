@@ -193,36 +193,21 @@ SceneBase {
             onXChanged: updateRoomOffset();
         }
 
-        EntityBaseDraggable {
+        //collider to detect when inventory is used on a hotspot
+        BoxCollider {
           id: activeInventoryCollider
-          entityId: "test"
-          entityType: "block"
-
-          visible: false;
+          width: 40
+          height: 40
 
           signal dropped;
+          visible: false;
+          property string inventoryId: "colliderOnly"
 
-          property string inventoryId: "testId"
+          bodyType: Body.Dynamic
 
-          selectionMouseArea.anchors.fill: rectangle
-          dragOffset: Qt.point(0,-5)
-
-          Rectangle {
-            id: rectangle
-            width: 32
-            height: 32
-            radius: 16
-            anchors.centerIn: parent
-            color: "brown"
-          }
-
-          BoxCollider {
-            id: collider
-            anchors.fill: rectangle
-            categories: Box.Category4
-            collidesWith: Box.Category5
-            collisionTestingOnlyMode: true
-          }
+          categories: Box.Category4
+          collidesWith: Box.Category5
+          collisionTestingOnlyMode: true
         }
 
     }
@@ -255,87 +240,9 @@ SceneBase {
         onClose: {panelLoader.source = ''; gameScene.panelClosed();}
     }   
 
-    //activeInventoryFrame
-    Rectangle {
+    ActiveInventoryFrame{
         id: activeInventoryFrame
-
-        property string inventoryId;
-
-        x: gameScene.width/2 - 25
-        y: gameScene.height - 50
-
-        width: 50;
-        height: 50
-
-        color: "pink"
-        opacity: .6
-        radius: width*0.5
-
-        Rectangle {
-            id: activeInventory
-            width: 50
-            height: 50
-            radius: 25
-            color: "blue"
-            Drag.active: dragFromFrame.drag.active
-
-            anchors {
-                horizontalCenter: parent.horizontalCenter;
-                verticalCenter: parent.verticalCenter
-            }
-
-            property bool dragging: false
-
-            states: [
-                State {
-                    when: activeInventory.dragging
-                    PropertyChanges {target: activeInventory; color: "green"}
-                    AnchorChanges {
-                        target: activeInventory;
-                        anchors.horizontalCenter: undefined;
-                        anchors.verticalCenter: undefined;
-                    }
-                }
-
-            ]
-        }
-
-        MouseArea {
-            id: dragFromFrame
-            anchors.fill: parent
-
-            Component.onCompleted: reset()
-
-            onPressed: {
-                follow(mouse);
-                viewPort.dragActiveInventory.visible = true;
-                activeInventory.dragging = true;
-            }
-            onReleased: {
-                activeInventory.dragging = false;
-                viewPort.dragActiveInventory.dropped();
-                viewPort.dragActiveInventory.visible = false;
-                reset();
-            }
-            onPositionChanged: follow(mouse);
-
-
-            function follow(mouse){
-                var vp = mapToItem(viewPort, mouse.x, mouse.y);
-                viewPort.dragActiveInventory.x = vp.x;
-                viewPort.dragActiveInventory.y = vp.y;
-                activeInventory.x = mouse.x - activeInventory.width/2;
-                activeInventory.y = mouse.y - activeInventory.height/2;
-            }
-
-            function reset(){
-                var vp = mapToItem(viewPort, activeInventory.x+activeInventory.width/2, activeInventory.y+activeInventory.height/2);
-                viewPort.dragActiveInventory.x = vp.x;
-                viewPort.dragActiveInventory.y = vp.y;
-            }
-        }
     }
-
 
     Scripted {
         id: scripted
