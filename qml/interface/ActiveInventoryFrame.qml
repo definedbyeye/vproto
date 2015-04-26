@@ -3,28 +3,43 @@ import VPlay 2.0
 import "../common"
 import "../interface"
 
+//tap - open inventory
+//tap item to select
+//close inventory
+
+
+
 //activeInventoryFrame
-Rectangle {
+Item {
     id: activeInventoryFrame
 
+    Component.onCompleted: inventoryId = "emptyGlass";
     property string inventoryId;
 
+    //bottom middle
+    //TODO: test top right
     x: gameScene.width/2 - 25
     y: gameScene.height - 50
 
     width: 50;
     height: 50
 
-    color: "pink"
-    opacity: .6
-    radius: width*0.5
-
     Rectangle {
+        id: frameBackground
+        anchors.centerIn: parent
+        width: 75
+        height: 75
+        opacity: .9
+        color: "tan"
+        border.width: 2
+        border.color: "#555"
+        radius: width*.5
+    }
+
+    Item {
         id: activeInventory
         width: 50
         height: 50
-        radius: 25
-        color: "blue"
         Drag.active: dragFromFrame.drag.active
 
         x: 0
@@ -32,12 +47,16 @@ Rectangle {
 
         property bool dragging: false
 
+        MultiResolutionImage {
+            source: inventoryId ? "../../assets/inventory/"+inventoryId+".png" : null;
+            anchors.fill: activeInventory;
+        }
+
         states: [
             State {
                 when: activeInventory.dragging
-                PropertyChanges {target: activeInventory; color: "green"}
+                PropertyChanges {target: frameBackground; opacity: .4}
             }
-
         ]
     }
 
@@ -48,6 +67,7 @@ Rectangle {
         Component.onCompleted: reset()
 
         onPressed: {
+            viewPort.dragActiveInventory.inventoryId = inventoryId;
             viewPort.dragActiveInventory.visible = true;
             activeInventory.dragging = true;
         }

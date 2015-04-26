@@ -30,6 +30,11 @@ RoomBase {
         onTap: {
             scripted.sequence = [{name: 'look', type: 'message', message: "... Bzzzzzt.... this is only a test."}]
         }
+        onUseWith: {
+            if(useWithInventoryId === "emptyGlass"){
+                scripted.sequence = [{name: 'look', type: 'message', message: "You drop the empty glass from a great height.<br>It SHATTERS to pieces below."}]
+            }
+        }
     }
 
 
@@ -38,7 +43,7 @@ RoomBase {
         y: 65
         width: 30
         height: 30
-        helperColor: "lightblue"
+        helperColor: "lightblue"        
         onTap: {scripted.sequence = [
                     {name: 'd1', type: 'dialog', orientation: 'left',  profile: 'player', message: 'Hello!', events: [{on: 'onPanelClosed', to: 'd2'}]},
                     {name: 'd2', type: 'dialog', orientation: 'right', profile: 'player', message: 'Who, me?', events: [{on: 'onPanelClosed', to: 'd3'}]},

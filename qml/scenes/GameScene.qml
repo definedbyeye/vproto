@@ -30,6 +30,7 @@ SceneBase {
     signal playerStopped;
     signal playerReachedTarget;
 
+    //TODO: clean these up with aliases or something
     property variant activePanel
     signal panelClosed;
     signal panelOpt1;
@@ -129,7 +130,7 @@ SceneBase {
         PhysicsWorld {
             id: physicsWorld
             gravity: Qt.point(0,0)
-            debugDrawVisible: true // enable this for physics debugging
+            debugDrawVisible: false // enable this for physics debugging
             z: 1000
         }
 
@@ -212,8 +213,16 @@ SceneBase {
 
     }
 
+    ActiveInventoryFrame{
+        id: activeInventoryFrame
+    }
+
     InventoryPanel {
         id: inventoryPanel
+    }
+
+    Scripted {
+        id: scripted
     }
 
     Loader {
@@ -240,16 +249,8 @@ SceneBase {
         onClose: {panelLoader.source = ''; gameScene.panelClosed();}
     }   
 
-    ActiveInventoryFrame{
-        id: activeInventoryFrame
-    }
 
-    Scripted {
-        id: scripted
-    }
-
-
-    //inventory panel visual helper
+    //inventory panel visual helper (on top of the panels for save/load controls later)
     Rectangle {
         color: "white"
         opacity: .2

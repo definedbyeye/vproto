@@ -2,6 +2,7 @@ import QtQuick 2.0
 import VPlay 2.0
 
 EntityBase {
+    entityType: "scriptedBase"
 
     property var sequence
     onSequenceChanged: loadStates()

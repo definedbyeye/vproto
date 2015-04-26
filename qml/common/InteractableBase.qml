@@ -19,15 +19,13 @@ Item {
     signal doubleTap()
     signal hold()    
 
-    signal useWith()
+    property string useWithInventoryId;
+    signal useWith
 
     onUseWith: console.log('----------------- use with '+useWithInventoryId);
 
     //optional for odd shaped areas
     property var areaVertices: [];
-
-    property string useWithInventoryId;
-
     Component.onCompleted: initArea();
 
 
@@ -44,15 +42,13 @@ Item {
         anchors.fill: interactable
 
         //detects when active inventory is dropped on this
-        //TODO: polygon collider (counter-clockwise vertices?)
+        //TODO: polygon collider (with counter-clockwise vertices?)
         BoxCollider {
           id: boxCollider
           x: interactable.x
           y: interactable.y
           width: interactable.width
           height: interactable.height
-
-          anchors.fill: interactable
 
           collisionTestingOnlyMode: true
           categories: Box.Category5
@@ -62,18 +58,21 @@ Item {
 
           fixture.onBeginContact: {
             collidedCollider = other.parent.parent;
-              console.log('----------------- collision! inventoryId: '+collidedCollider.inventoryId);
             collidedCollider.dropped.connect(useWith);
             interactable.useWithInventoryId = collidedCollider.inventoryId;
+            //TODO: move to state
+            mouseBox.opacity = .9
           }
 
           fixture.onEndContact: {
             collidedCollider.dropped.disconnect(useWith);
             interactable.useWithInventoryId = '';
+            mouseBox.opacity = .5
           }
         }
 
 
+        // trigger mouse interaction signals
         MouseArea {
             anchors.fill: parent
             onReleased: if(inArea(mouse)) triggerSwipe(mouse)
