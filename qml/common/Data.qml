@@ -118,6 +118,14 @@ Item {
         });
     }
 
+    function removeState (entity, id, db) {
+        db = db || openDb();
+        var tableName = entity.charAt(0).toUpperCase() + entity.slice(1) + 'States';
+        db.transaction(function(tx) {
+            tx.executeSql('DELETE FROM '+tableName+' WHERE saveId = '+storage.quickSaveId+' AND '+entity+'Id = "'+id+'"');
+        });
+    }
+
     function loadState (entity, id, state, db) {
         db = db || openDb();
         var tableName = entity.charAt(0).toUpperCase() + entity.slice(1) + 'States';

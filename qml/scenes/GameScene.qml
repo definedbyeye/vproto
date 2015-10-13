@@ -43,81 +43,6 @@ SceneBase {
     onActivePlayerIdChanged: storage.savePlayerId(activePlayerId);
     onActiveRoomIdChanged: storage.saveRoomId(activeRoomId);
 
-    function init() {
-        var gameState = storage.getPlayerState();
-
-        setPlayer(gameState.playerId);
-        setRoom(gameState.roomId);
-        activePlayer.x = gameState.x;
-        activePlayer.y = gameState.y;
-
-        initInventory();                
-    }
-
-    function initInventory() {
-        var inventoryItems = storage.getInventoryState();
-        for(var i = 0; i < inventoryItems.length; i++){            
-            inventoryPanel.addInventory(inventoryItems[i].inventoryId, false); //TODO: extend to add state eg qty
-        }
-    }
-
-    function setRoom(toRoomId, fromAreaId) {
-
-        //allow new room to set the player's position based on the old room
-        //TODO: fromInteractId
-        //roomLoader.fromInteractId = activeRoomId;
-        activeRoomId = toRoomId;
-        roomLoader.fromAreaId = fromAreaId || '';
-        roomLoader.source = "../rooms/" + activeRoomId.charAt(0).toUpperCase() + activeRoomId.slice(1) + '.qml';
-
-    }
-
-    function setPlayer(playerId) {
-
-        activePlayerId = playerId;
-        playerLoader.source = "../players/" + activePlayerId.charAt(0).toUpperCase() + activePlayerId.slice(1) + '.qml';
-
-    }
-
-
-    //NOTE: does not actually change player item dimensions - that screws with too many calculations atm
-    function updatePlayerScale(){
-        var minP = activeRoom.minPerspective;
-        var maxP = activeRoom.maxPerspective;
-        var position = (activePlayer.y+activePlayer.height) / activeRoom.height;
-        activePlayer.mediaScale = ((maxP - minP) * position) + minP;
-    }
-
-    //TODO: save static numbers
-    function updateRoomOffset() {
-        //if player is in the right half of the screen && there is more of the room to show to the right....
-        var midPoint = gameScene.width/2;
-        var playerX = mapFromItem(activePlayer).x;
-        if(playerX > midPoint){
-            if(viewPort.x > -(viewPort.width - gameScene.width)){
-                viewPort.x -= playerX - midPoint;
-            }
-        } else {
-            if(viewPort.x < 0){
-                viewPort.x -= playerX - midPoint;
-            }
-
-        }
-    }
-
-    Text {
-        id: roomTitle
-
-        anchors.top: gameScene.top;
-        anchors.left: gameScene.left;
-
-        text: activeRoomId
-
-        z: 1005
-
-    }
-
-
     // contains the full room.  gamescene only shows part of this.
     Item {
         id: viewPort
@@ -162,8 +87,6 @@ SceneBase {
                 activeRoom.placePlayer(activePlayer, fromAreaId);
             }
         }
-
-        // we connect the gameScene to the loaded room
         Connections {
             // only connect if a level is loaded, to prevent errors
             target: activeRoom !== undefined ? activeRoom : null        
@@ -180,7 +103,6 @@ SceneBase {
                 activePlayer = item
             }
         }
-
         Connections {
             target: activePlayer !== undefined ? activePlayer : null
             onMoveStopped: {
@@ -264,8 +186,20 @@ SceneBase {
         MouseArea {
             id: gameSceneUI
             anchors.fill: parent
-            onReleased: inventoryPanel.show = true
+            onReleased: inventoryPanel.show()
         }
+    }
+
+    Text {
+        id: roomTitle
+
+        anchors.top: gameScene.top;
+        anchors.left: gameScene.left;
+
+        text: activeRoomId
+
+        z: 1005
+
     }
 
     //console log the mouse click for dev purposes
@@ -279,6 +213,71 @@ SceneBase {
         onPositionChanged: mouse.accepted = false;
         onPressAndHold: mouse.accepted = false;
         onClicked: { console.log('POINT: ' + mouseX + ', ' + mouseY); mouse.accepted = false;}
+    }
+
+
+
+
+    function init() {
+        var gameState = storage.getPlayerState();
+
+        setPlayer(gameState.playerId);
+        setRoom(gameState.roomId);
+        activePlayer.x = gameState.x;
+        activePlayer.y = gameState.y;
+
+        initInventory();
+    }
+
+    function initInventory() {
+        var inventoryItems = storage.getInventoryState();
+        for(var i = 0; i < inventoryItems.length; i++){
+            inventoryPanel.addInventory(inventoryItems[i].inventoryId, false); //TODO: extend to add state eg qty
+        }
+    }
+
+    function setRoom(toRoomId, fromAreaId) {
+
+        //allow new room to set the player's position based on the old room
+        //TODO: fromInteractId
+        //roomLoader.fromInteractId = activeRoomId;
+        activeRoomId = toRoomId;
+        roomLoader.fromAreaId = fromAreaId || '';
+        roomLoader.source = "../rooms/" + activeRoomId.charAt(0).toUpperCase() + activeRoomId.slice(1) + '.qml';
+
+    }
+
+    function setPlayer(playerId) {
+
+        activePlayerId = playerId;
+        playerLoader.source = "../players/" + activePlayerId.charAt(0).toUpperCase() + activePlayerId.slice(1) + '.qml';
+
+    }
+
+
+    //NOTE: does not actually change player item dimensions - that screws with too many calculations atm
+    function updatePlayerScale(){
+        var minP = activeRoom.minPerspective;
+        var maxP = activeRoom.maxPerspective;
+        var position = (activePlayer.y+activePlayer.height) / activeRoom.height;
+        activePlayer.mediaScale = ((maxP - minP) * position) + minP;
+    }
+
+    //TODO: save static numbers
+    function updateRoomOffset() {
+        //if player is in the right half of the screen && there is more of the room to show to the right....
+        var midPoint = gameScene.width/2;
+        var playerX = mapFromItem(activePlayer).x;
+        if(playerX > midPoint){
+            if(viewPort.x > -(viewPort.width - gameScene.width)){
+                viewPort.x -= playerX - midPoint;
+            }
+        } else {
+            if(viewPort.x < 0){
+                viewPort.x -= playerX - midPoint;
+            }
+
+        }
     }
 
 }
