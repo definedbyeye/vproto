@@ -3,11 +3,12 @@ import QtQuick 2.4
 import "../common"
 
 
-Item {
+EntityBase {
     id: interactable
+    entityId: "interactable"
+    entityType: "interactable"
 
-    property int triggerSensitivity: 20
-    property string helperColor: '#fff'
+    property int triggerSensitivity: 20    
 
     // interactable exposes these events:
     signal swipeUp()
@@ -19,68 +20,46 @@ Item {
     signal doubleTap()
     signal hold()    
 
+    //detects inventory drag/drop
     property string useWithInventoryId;
-    signal useWith
 
+    signal dropped
+    onDropped: {if(useWithInventoryId) useWith()}
+
+    signal useWith
     onUseWith: console.log('----------------- use with '+useWithInventoryId);
 
     //optional for odd shaped areas
     property var areaVertices: [];
     Component.onCompleted: initArea();
-
-
     Polygon {
         id: interactArea
         vertices: areaVertices
+    }                
+
+    //detects when active inventory is dropped on this
+    //TODO: polygon collider (with counter-clockwise vertices?)
+    BoxCollider {
+      id: boxCollider
+      x: interactable.x
+      y: interactable.y
+      width: interactable.width
+      height: interactable.height
+
+      collisionTestingOnlyMode: true
+      categories: Box.Category5
+      collidesWith: Box.Category4
     }
 
-    Rectangle {
-        id: mouseBox
 
-        color: helperColor
-        opacity: .5
-        anchors.fill: interactable
-
-        //detects when active inventory is dropped on this
-        //TODO: polygon collider (with counter-clockwise vertices?)
-        BoxCollider {
-          id: boxCollider
-          x: interactable.x
-          y: interactable.y
-          width: interactable.width
-          height: interactable.height
-
-          collisionTestingOnlyMode: true
-          categories: Box.Category5
-          collidesWith: Box.Category4
-
-          property var collidedCollider;
-
-          fixture.onBeginContact: {
-            collidedCollider = other.parent.parent;
-            collidedCollider.dropped.connect(useWith);
-            interactable.useWithInventoryId = collidedCollider.inventoryId;
-            //TODO: move to state
-            mouseBox.opacity = .9
-          }
-
-          fixture.onEndContact: {
-            collidedCollider.dropped.disconnect(useWith);
-            interactable.useWithInventoryId = '';
-            mouseBox.opacity = .5
-          }
-        }
-
-
-        // trigger mouse interaction signals
-        MouseArea {
-            anchors.fill: parent
-            onReleased: if(inArea(mouse)) triggerSwipe(mouse)
-            onClicked: if(inArea(mouse)) tap()
-            onDoubleClicked: if(inArea(mouse)) doubleTap()
-            onPressAndHold: if(inArea(mouse)) hold()
-        }
-    }                
+    // trigger mouse interaction signals
+    MouseArea {
+        anchors.fill: parent
+        onReleased: if(inArea(mouse)) triggerSwipe(mouse)
+        onClicked: if(inArea(mouse)) tap()
+        onDoubleClicked: if(inArea(mouse)) doubleTap()
+        onPressAndHold: if(inArea(mouse)) hold()
+    }
 
 
     //only triggers a swipe if the mouse has traveled > 20
@@ -129,10 +108,6 @@ Item {
             interactable.y = minY;
             interactable.width = maxX-minX;
             interactable.height = maxY-minY;
-
-        } else {
-
-            //mouseBox.anchors.fill = interactable;
 
         }
     }

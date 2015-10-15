@@ -26,24 +26,159 @@ RoomBase {
     // interaction areas
 
     InteractableBase {
+        id: glass1
+
+        x: 310
+        y: 170
+        width: 32
+        height: 48
+
+        onTap: {inventoryPanel.addInventory("emptyGlass"); glass1.destroy();}
+
+        onSwipeUp: {glassSprite.jumpTo("empty")}
+        onSwipeDown: {if(glassSprite.spriteSequence.currentSprite !== "boil" && glassSprite.spriteSequence.currentSprite !== "freeze") glassSprite.jumpTo("full")}
+        onSwipeRight: {if(glassSprite.spriteSequence.currentSprite !== "empty") glassSprite.jumpTo("boil")}
+        onSwipeLeft: {if(glassSprite.spriteSequence.currentSprite !== "empty") glassSprite.jumpTo("freeze")}
+
+        SpriteSequenceVPlay {
+            id: glassSprite
+            width: 32
+            height: 48
+
+            defaultSource: "../../assets/hotspot/sprite_glass.png"
+
+            SpriteVPlay {
+                name: "empty"
+                frameWidth: 41
+                frameHeight: 59
+                //frameCount: 1
+                startFrameColumn: 1
+                //frameRate: 1
+                //to: {"full":0, "empty":1}
+            }
+            SpriteVPlay {
+                name: "full"
+                frameWidth: 41
+                frameHeight: 59
+                //frameCount: 1
+                startFrameColumn: 2
+                //frameRate: 1
+                //to: {"full":1}
+            }
+            SpriteVPlay {
+                name: "boil"
+                frameWidth: 41
+                frameHeight: 59
+                //frameCount: 1
+                startFrameColumn: 3
+                //frameRate: 1
+                //to: {"boil":1}
+            }
+            SpriteVPlay {
+                name: "freeze"
+                startFrameColumn: 4
+                frameWidth: 41
+                frameHeight: 59
+                //to: {"freeze":1}
+            }
+
+        }
+    }
+
+
+
+    InteractableBase {
+        id: glass2
+
+        x: 560
+        y: 170
+        width: 30
+        height: 50
+
+        onTap: {scripted.sequence = [
+                    {name: 'getCloser', type: 'moveTo', x: 274, y: 270, events: [
+                            {on: 'onPlayerReachedTarget', to: 'firstLook'},
+                            {on: 'onPlayerStopped', to: 'firstLook'}
+                        ]},
+                    {name: 'firstLook', type: 'take',   inventoryId: 'emptyGlass', events: [
+                            {on: 'onPanelOpt1', to: 'leaveIt'},
+                            {on: 'onPanelOpt2', to: 'takeIt'}
+                        ]},
+                    {name: 'leaveIt',   type: 'message', message: 'Eh, I\'ll leave it alone for now.'},
+                    {name: 'takeIt',    type: 'message', message: 'I pick it up and put it in my pocket.'}
+                ]}
+
+        SpriteSequenceVPlay {
+            id: glassSprite2
+            anchors.fill: parent
+
+            defaultSource: "../../assets/hotspot/sprite_glass.png"
+
+            SpriteVPlay {
+                name: "empty"
+                frameWidth: 41
+                frameHeight: 59
+                //frameCount: 1
+                startFrameColumn: 1
+                //frameRate: 1
+                //to: {"full":0, "empty":1}
+            }
+            SpriteVPlay {
+                name: "full"
+                frameWidth: 41
+                frameHeight: 59
+                //frameCount: 1
+                startFrameColumn: 2
+                //frameRate: 1
+                //to: {"full":1}
+            }
+            SpriteVPlay {
+                name: "boil"
+                frameWidth: 41
+                frameHeight: 59
+                //frameCount: 1
+                startFrameColumn: 3
+                //frameRate: 1
+                //to: {"boil":1}
+            }
+            SpriteVPlay {
+                name: "freeze"
+                startFrameColumn: 4
+                frameWidth: 41
+                frameHeight: 59
+                //to: {"freeze":1}
+            }
+
+        }
+
+    }
+
+
+    InteractableBase {
         areaVertices: [Qt.point(0,0), Qt.point(150, 0), Qt.point(100, 100), Qt.point(0, 200)]
+        Rectangle {
+            anchors.fill:parent
+            opacity: .5
+            color: "white"
+        }
         onTap: {
             scripted.sequence = [{name: 'look', type: 'message', message: "... Bzzzzzt.... this is only a test."}]
         }
         onUseWith: {
             if(useWithInventoryId === "emptyGlass"){
+                inventoryPanel.removeInventory("emptyGlass");
                 scripted.sequence = [{name: 'look', type: 'message', message: "You drop the empty glass from a great height.<br>It SHATTERS to pieces below."}]
             }
         }
     }
 
 
+    /*
     InteractableBase {
         x: 161
         y: 65
         width: 30
-        height: 30
-        helperColor: "lightblue"        
+        height: 30               
         onTap: {scripted.sequence = [
                     {name: 'd1', type: 'dialog', orientation: 'left',  profile: 'player', message: 'Hello!', events: [{on: 'onPanelClosed', to: 'd2'}]},
                     {name: 'd2', type: 'dialog', orientation: 'right', profile: 'player', message: 'Who, me?', events: [{on: 'onPanelClosed', to: 'd3'}]},
@@ -56,24 +191,9 @@ RoomBase {
                     {name: 'd5', type: 'dialog', orientation: 'left', profile: 'player', message: 'Its confirmed. I\'m talking to myself.'}
                 ]}
     }
+    */
 
-
-
-    InteractableBase {
-        x: 315
-        y: 161
-        width: 30
-        height: 50
-        helperColor: "pink"
-        onTap: {scripted.sequence = [
-                    {name: 'getCloser', type: 'moveTo', x: 274, y: 270, events: [{on: 'onPlayerReachedTarget', to: 'firstLook'}]},
-                    {name: 'firstLook', type: 'take',   inventoryId: 'emptyGlass', events: [{on: 'onPanelOpt1', to: 'leaveIt'}, {on: 'onPanelOpt2', to: 'takeIt'}]},
-                    {name: 'leaveIt',   type: 'message', message: 'Eh, I\'ll leave it alone for now.'},
-                    {name: 'takeIt',    type: 'message', message: 'I pick it up and put it in my pocket.'}
-                ]}
-    }
-
-
+    /*
     Rectangle {
         x: 400
         y: 300
@@ -91,6 +211,7 @@ RoomBase {
 
         }
     }
+    */
 
     // transition areas
     Area {
@@ -123,10 +244,10 @@ RoomBase {
     Wall {
         id: topWall
         vertices: [
-            Qt.point(238, 236), // top left
-            Qt.point(238, 241), // bottom left
-            Qt.point(905, 241), // bottom right
-            Qt.point(905, 236) // top right
+            Qt.point(190, 255), // top left
+            Qt.point(190, 260), // bottom left
+            Qt.point(985, 260), // bottom right
+            Qt.point(985, 255) // top right
         ]
     }
 

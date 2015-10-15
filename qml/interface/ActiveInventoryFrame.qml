@@ -13,13 +13,14 @@ import "../interface"
 Item {
     id: activeInventoryFrame
 
-    Component.onCompleted: inventoryId = "emptyGlass";
     property string inventoryId;
 
     //bottom middle
     //TODO: test top right
-    x: gameScene.width/2 - 25
-    y: gameScene.height - 50
+    //x: gameScene.width/2 - 25
+    //y: gameScene.height - 50
+    x: inventoryId ? gameScene.width - 50 : -60
+    y: inventoryId ? 0 : -60
 
     width: 50;
     height: 50
@@ -48,7 +49,7 @@ Item {
         property bool dragging: false
 
         MultiResolutionImage {
-            source: inventoryId ? "../../assets/inventory/"+inventoryId+".png" : null;
+            source: inventoryId ? "../../assets/inventory/"+inventoryId+".png" : '';
             anchors.fill: activeInventory;
         }
 
@@ -65,6 +66,10 @@ Item {
         anchors.fill: parent
 
         Component.onCompleted: reset()
+
+        onClicked: {
+           inventoryPanel.show();
+        }
 
         onPressed: {
             viewPort.dragActiveInventory.inventoryId = inventoryId;

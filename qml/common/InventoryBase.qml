@@ -1,5 +1,6 @@
 import VPlay 2.0
 import QtQuick 2.0
+import "../interface"
 
 EntityBase {
     entityId: inventoryId
@@ -30,7 +31,8 @@ EntityBase {
     MouseArea {
         anchors.fill: parent
         hoverEnabled: true
-        onPressed: inventoryPanel.descriptionText = description;
+        //onPressed: inventoryPanel.descriptionText = description;
+        onPressed: {activeInventoryFrame.inventoryId = inventoryId; inventoryPanel.hide()}
         onEntered: inventoryPanel.descriptionText = description;
     }
 }

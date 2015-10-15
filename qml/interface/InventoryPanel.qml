@@ -14,44 +14,31 @@ Item {
     y: 0 - height
     z: 1001
 
-    property string descriptionText: ''
-
-    //set save to false on initial load
-    function addInventory(inventoryId, save) {
-        save = (save !== false);
-        var existingInv = inventoryManager.getEntityById(inventoryId);
-        if(!existingInv) {
-            var invItem = storage.getInventoryItem(inventoryId);
-            inventoryManager.createEntityFromUrlWithProperties(
-                        Qt.resolvedUrl("../common/InventoryBase.qml"), invItem);
-            if(save){                
-                storage.saveState('inventory', inventoryId, '');
-            }
-        }
-    }
+    property string descriptionText: ''    
 
     MouseArea {
         anchors.fill: parent
-        onReleased: {
-            show = false
-        }
+        onReleased: hide()
     }
 
     PropertyAnimation { id: showPanel; target: inventoryPanel; property: "y"; to: 0; duration: 700; easing.type: Easing.InOutCubic; }
     PropertyAnimation { id: hidePanel; target: inventoryPanel; property: "y"; to: 0-height; duration: 1500; easing.type: Easing.OutBack; }
 
-    property bool show: false
+    signal hide
+    signal show
 
-    onShowChanged: {
-        if(show) {
-            hidePanel.running = false;
-            showPanel.running = true;
-        } else {
-            showPanel.running = false;
-            hidePanel.running = true;
-            inventoryPanel.descriptionText = '';
-        }
+    onHide: {
+        showPanel.running = false;
+        hidePanel.running = true;
+        inventoryPanel.descriptionText = '';
     }
+
+    onShow: {
+        hidePanel.running = false;
+        showPanel.running = true;
+    }
+
+    //TODO: fix the background here so that it fills the screen and only the frame animates in
 
     Rectangle {
         color: "#cccccc"
@@ -99,6 +86,36 @@ Item {
                 id: inventoryGrid                                
                 width: scrollView.width-10
             }
+        }
+    }
+
+    //set save to false on initial load
+    function addInventory(inventoryId, save) {
+        save = (save !== false);
+        var existingInv = inventoryManager.getEntityById(inventoryId);
+        if(!existingInv) {
+            var invItem = storage.getInventoryItem(inventoryId);
+
+            inventoryManager.createEntityFromUrlWithProperties(
+                        Qt.resolvedUrl("../common/InventoryBase.qml"), invItem);
+
+            console.log('------- last added: '+inventoryManager.getLastAddedEntity().entityId);
+
+            activeInventoryFrame.inventoryId = inventoryId;
+
+            if(save){
+                storage.saveState('inventory', inventoryId, '');
+            }
+        }
+    }
+
+    function removeInventory(inventoryId, save) {
+        save = (save !== false);
+        if(inventoryManager.removeEntityById(inventoryId) && save) {
+            storage.removeState('inventory', inventoryId);
+        }
+        if(activeInventoryFrame.inventoryId === inventoryId){
+            activeInventoryFrame.inventoryId = '';
         }
     }
 
