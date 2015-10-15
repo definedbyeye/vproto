@@ -116,21 +116,38 @@ SceneBase {
             onXChanged: updateRoomOffset();
         }
 
-        //collider to detect when inventory is used on a hotspot
+        // Pressing MouseArea.dragFromFrame inits this
+        // collider with an inventory ID and starts dragging the
+        // activeInventory.  On release, the dropped signal is
+        // triggered here which maps to the interactable that we
+        // collided with and triggers any 'useWith' handlers.
         BoxCollider {
           id: activeInventoryCollider
           width: 40
           height: 40
 
-          signal dropped;
-          visible: false;
-          property string inventoryId: "colliderOnly"
-
           bodyType: Body.Dynamic
-
+          visible: false;
           categories: Box.Category4
           collidesWith: Box.Category5
           collisionTestingOnlyMode: true
+
+          signal dropped;
+
+          property string inventoryId: "colliderOnly"
+          property var interactWith;
+
+          fixture.onBeginContact: {
+            interactWith = other.getBody().target;
+            interactWith.useWithInventoryId = activeInventoryCollider.inventoryId;
+            dropped.connect(interactWith.dropped);
+          }
+
+          fixture.onEndContact: {
+            dropped.disconnect(interactWith.dropped);
+            interactWith.useWithInventoryId = '';
+          }
+
         }
 
     }

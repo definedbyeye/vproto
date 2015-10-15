@@ -49,19 +49,6 @@ EntityBase {
       collisionTestingOnlyMode: true
       categories: Box.Category5
       collidesWith: Box.Category4
-
-      property var collidedCollider;
-
-      fixture.onBeginContact: {
-        collidedCollider = other.parent.parent;
-        collidedCollider.dropped.connect(dropped);
-        interactable.useWithInventoryId = collidedCollider.inventoryId;
-      }
-
-      fixture.onEndContact: {
-        collidedCollider.dropped.disconnect(dropped);
-        interactable.useWithInventoryId = '';
-      }
     }
 
 
