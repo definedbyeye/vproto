@@ -13,5 +13,9 @@ PolygonCollider {
     vertices: []
 
     fixture.onBeginContact: {}
+
+    Component.onCompleted: {
+        parent.obstructions.push(this);
+    }
 }
 
