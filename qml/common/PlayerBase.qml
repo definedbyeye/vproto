@@ -9,72 +9,103 @@ EntityBase {
     property int speed: 150
     property real mediaScale: 1
 
+    property int colliderX: x + width/2
+    property int colliderY: y + height - 5
+
+    property var moveToPoint: null;
+    property var waypoints: [];
+
+    signal waypointReached
+    signal targetReached
+    signal targetIsClose
     signal moveStopped
-    signal targetReached    
 
-    function isTargetReached() {
-        var pX = playerBase.x + playerBase.width/2
-        var pY = playerBase.y + playerBase.height - 5
-        var toX = moveToPointHelper.targetPoint.x
-        var toY = moveToPointHelper.targetPoint.y
+    function placePlayer(point) {
+        x = point.x-(width/2);
+        y = point.y = height + 5;
+    }
 
-        if((playerBase.direction === "NW" && pX <= toX && pY <= toY)
-         || (playerBase.direction === "NE" && pX > toX && pY <= toY)
-         || (playerBase.direction === "SE" && pX > toX && pY > toY)
-         || (playerBase.direction === "SW" && pX <= toX && pY > toY)) {
-            playerCollider.linearVelocity = Qt.point(0,0);
-            targetReached();
+    onWaypointsChanged: {
+        //console.log('onWaypointsChanged, update movetopoint to: '+waypoints[0]);
+        if(waypoints.length) {
+            moveToPoint = waypoints[0];
+            move();
         }
     }
 
-    //doesn't work
-    function isTargetCloseEnough() {
-        var pX = playerBase.x + playerBase.width/2
-        var pY = playerBase.y + playerBase.height - 5
-        var toX = moveToPointHelper.targetPoint.x
-        var toY = moveToPointHelper.targetPoint.y
-
-        if((playerBase.direction[0] === "N" && pY <= toY)
-         || (playerBase.direction[0] === "S" && pY < toY)
-         || (playerBase.direction[1] === "E" && pX > toX)
-         || (playerBase.direction[1] === "W" && pX <= toX)) {
-            playerCollider.linearVelocity = Qt.point(0,0)
+    /*
+    onMoveToPointChanged: {        
+        if(moveToPoint != null){
+            console.log('onMoveTOPointChanged: from '+colliderX+','+colliderY+' to '+moveToPoint.x+','+moveToPoint.y);
+            move();
         }
+    }
+    */
+
+    onWaypointReached: {
+        //console.log('onWaypointREached: waypoints length ' + waypoints.length);
+        waypoints.shift();
+        if(waypoints.length === 0){
+            console.log('REACHED END OF PATH');
+            targetReached();
+        } else {
+            moveToPoint = waypoints[0];
+            move();
+        }
+    }
+
+    function isWaypointReached() {
+        var toX = moveToPoint.x
+        var toY = moveToPoint.y
+
+        if((direction === "NW" && colliderX <= toX && colliderY <= toY)
+         || (direction === "NE" && colliderX > toX && colliderY <= toY)
+         || (direction === "SE" && colliderX > toX && colliderY > toY)
+         || (direction === "SW" && colliderX <= toX && colliderY > toY)) {
+            playerCollider.linearVelocity = Qt.point(0,0);
+            //console.log('STOP');
+            waypointReached();
+        }
+    }
+
+    onTargetReached: {
+        moveToPoint = null;
     }
 
     //todo: throttle this?
-    onXChanged: isTargetReached()
-    onYChanged: isTargetReached()
+    onXChanged: {
+            if(moveToPoint){
+                isWaypointReached()
+            }
+        }
+    onYChanged: {
+            if(moveToPoint){
+                isWaypointReached()
+            }
+        }
 
-//    todo: just make this a function?
-    signal moveTo(real toX, real toY)
+    function move() {
 
-    onMoveTo: {
-        var fromX = playerBase.x + playerBase.width/2
-        var fromY = playerBase.y + playerBase.height - 5
-        var diffX = toX - fromX
-        var diffY = toY - fromY
+
+        var diffX = moveToPoint.x - colliderX
+        var diffY = moveToPoint.y - colliderY
+
+        //console.log('moving... '+colliderX+','+colliderY+' to '+moveToPoint.x+','+moveToPoint.y);
 
         //is the player already standing on the point?
         if(Math.abs(diffY) < 2 && Math.abs(diffX) < 2){
-            targetReached();
+            waypointReached();
             return;
         }
 
-        var speed = Math.abs(playerBase.speed/Math.sqrt((diffX*diffX) + (diffY*diffY)))
+        var newSpeed = Math.abs(speed/Math.sqrt((diffX*diffX) + (diffY*diffY)))
 
-        moveToPointHelper.targetPoint = Qt.point(toX, toY)
-        playerCollider.linearVelocity = Qt.point(0,0) //stop before changing direction
-        playerCollider.linearVelocity = Qt.point(diffX*speed, diffY*speed)
+        playerCollider.linearVelocity = Qt.point(diffX*newSpeed, diffY*newSpeed)
 
-        if(playerCollider.linearVelocity.x <= 0 && playerCollider.linearVelocity.y <= 0) {playerBase.direction = "NW"}
-        else if(playerCollider.linearVelocity.x > 0 && playerCollider.linearVelocity.y <= 0) {playerBase.direction = "NE"}
-        else if(playerCollider.linearVelocity.x > 0 && playerCollider.linearVelocity.y > 0) {playerBase.direction = "SE"}
-        else if(playerCollider.linearVelocity.x <= 0 && playerCollider.linearVelocity.y > 0) {playerBase.direction = "SW"}
-    }
-
-    MoveToPointHelper {
-        id: moveToPointHelper
+        if(playerCollider.linearVelocity.x <= 0 && playerCollider.linearVelocity.y <= 0) {direction = "NW"}
+        else if(playerCollider.linearVelocity.x > 0 && playerCollider.linearVelocity.y <= 0) {direction = "NE"}
+        else if(playerCollider.linearVelocity.x > 0 && playerCollider.linearVelocity.y > 0) {direction = "SE"}
+        else if(playerCollider.linearVelocity.x <= 0 && playerCollider.linearVelocity.y > 0) {direction = "SW"}
     }
 
     BoxCollider {
@@ -89,7 +120,7 @@ EntityBase {
 
         collisionTestingOnlyMode: false
 
-        fixture.onBeginContact: {            
+        fixture.onBeginContact: {
             playerCollider.linearVelocity = Qt.point(0,0);
             moveStopped();
         }

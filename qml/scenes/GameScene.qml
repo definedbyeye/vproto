@@ -11,6 +11,7 @@ import "../interface"
    Box.Category3 -- Area
    Box.Category4 -- ActiveInventory
    Box.Category5 -- InteractiveHotspot
+   Box.Category6 -- Obstruction (not a wall)
 */
 
 
@@ -43,7 +44,8 @@ SceneBase {
     onActivePlayerIdChanged: storage.savePlayerId(activePlayerId);
     onActiveRoomIdChanged: storage.saveRoomId(activeRoomId);
 
-    // contains the full room.  gamescene only shows part of this.
+    // viewport contains the full room.  gamescene only shows part of it.
+    // todo: flip the two names
     Item {
         id: viewPort
 
@@ -55,10 +57,11 @@ SceneBase {
         PhysicsWorld {
             id: physicsWorld
             gravity: Qt.point(0,0)
-            debugDrawVisible: false // enable this for physics debugging
+            debugDrawVisible: true // enable this for physics debugging
             z: 1000
         }
 
+        //mouse layer captures clicks if no overlaying layers intercept first
         MouseArea {
             id: clickToMove
             anchors.fill: viewPort;
@@ -70,9 +73,11 @@ SceneBase {
                 pressedY = mouseY + (gameScene.height - activeRoom.height);
             }
             onReleased: {                
-                activePlayer.moveTo(mouseX, mouseY)
+                //activePlayer.moveTo(mouseX, mouseY)
+                var start = mapToItem(activeRoom, activePlayer.colliderX, activePlayer.colliderY);
+                var end = mapToItem(activeRoom, mouseX, mouseY);
+                activePlayer.waypoints = activeRoom.getPath(start, end);
             }
-
         }
 
         // load levels at runtime
@@ -84,6 +89,7 @@ SceneBase {
 
             onLoaded: {
                 activeRoom = item;
+                activeRoom.initGraph();
                 activeRoom.placePlayer(activePlayer, fromAreaId);
             }
         }
@@ -105,11 +111,14 @@ SceneBase {
         }
         Connections {
             target: activePlayer !== undefined ? activePlayer : null
+            /*
             onMoveStopped: {
                 gameScene.playerStopped();
                 storage.savePlayerPoint(Qt.point(target.x, target.y));
             }
+            */
             onTargetReached: {
+                storage.savePlayerPoint(Qt.point(target.x, target.y));
                 gameScene.playerReachedTarget();
             }
             onYChanged: updatePlayerScale();

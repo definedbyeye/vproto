@@ -153,7 +153,7 @@ Item {
                               'room1',
                               200,
                               120,
-                              Date.parse(Date()),
+                              Date.parse(Date()), //todo: why??
                               Date.parse(Date())
                           ]);
         });    
@@ -169,7 +169,7 @@ Item {
     //TODO: loadgame should not be available under certain conditions....
     function loadGame(id, db) {
         id = id || storage.quickSaveId;
-        db = db || openDb()
+        db = db || openDb();
 
         //check that quicksave exists, else create new game
         db.transaction(function(tx) {
