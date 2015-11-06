@@ -3,6 +3,10 @@ function deepCopy(obj) {
     return JSON.parse(JSON.stringify(obj));
 }
 
+function pointInPoly(point, vertices){
+    return wn_PnPoly(point, vertices) !== 0;
+}
+
 // Copyright 2000 softSurfer, 2012 Dan Sunday
 // This code may be freely used and modified for any purpose
 // providing that this copyright notice is included with it.

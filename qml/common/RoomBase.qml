@@ -21,35 +21,27 @@ Item {
   property string goToRoomId: ''
   property string fromAreaId: ''
 
-  property variant nodes: []
-  property int stepSize: 20
+  property variant nodes: []    //multi array [x][y] blocked=0
+  property variant graph: null  //nodes translated to astar graph obj
+  property int stepSize: 10
 
-  /*
-  signal drawBlocks(var blocks, var color);
-  onDrawBlocks: {
-      drawBlocksNow(blocks, color);
-  }
+  // obstructions are pushed here as they are created.
+  // on room load, these are translated to SAT objects.
+  // todo: cache to db
+  property var obstructions: []
 
-  EntityManager {
-      id: testGrid
-      entityContainer: roomBase
-      dynamicCreationEntityList: []
-  }
+  //has room been initialized before
+  //todo: not sure if room retains nodes, graphs, etc on reload
+  property bool init: false
 
-  function drawBlocksNow(blocks, color) {
-      if(blocks.length > 0){
-      for(var i = 0; i < blocks.length; i++){
-
-          testGrid.createEntityFromUrlWithProperties(
-                      Qt.resolvedUrl("Block.qml"), {"x": blocks[i].x, "y": blocks[i].y, 'color': color});
-
-      }
+  signal loaded
+  onLoaded: {
+      //todo: save generated nodes and graph to db
+      if(!init){
+        initGraph();
+        init = true;
       }
   }
-  */
-
-  property var obstructions: [] //currently only walls - should separate walls and obstructions.  Walls only check if the stepper is inside them.  Obstructions check stepper->obst then check obstruction->stepper
-  property var obstructionSAT: [] //translated to SAT objects
 
   function placePlayer(player, fromAreaId) {
       player.placePlayer(defaultPlayerPoint);
@@ -60,31 +52,16 @@ Item {
           blocked = false,
           stepX = 0,
           stepY = 0;
-
-      nodes = [];
       var blocks = [];
 
-      var i, j, v, o;
-      if(obstructions.length){
-          for(i=0; i < obstructions.length; i++){
-              o = obstructions[i];
-              v = [];
-              for(j=0; j < o.vertices.length; j++){
-                  v.push(new Sat.Vector(o.vertices[j].x,o.vertices[j].y));
-              }
-              obstructionSAT.push(new Sat.Polygon(new Sat.Vector(o.x, o.y), v));
-          }
-      }
+      convertObstructionsToSAT();
 
       while(stepX <= width) {
           while(stepY <= height) {
-            blocked = isStepBlocked(Qt.point(stepX, stepY), stepSize) ? 0 : 1;
-
-            row.push(blocked);
-            if(!blocked){
-                //console.log('making nodes: ['+nodes.length+','+row.length+'] '+blocked)
-                blocks.push(Qt.point(stepX,stepY));
-            };
+            row.push(isNodeBlocked(Qt.point(stepX, stepY), stepSize) ? 0 : 1);
+              //if(!isNodeBlocked(Qt.point(stepX, stepY), stepSize) ? 0 : 1){
+              //    blocks.push(Qt.point(stepX,stepY));
+              //};
             stepY += stepSize;
           }
           nodes.unshift(row);
@@ -92,15 +69,37 @@ Item {
           stepY = 0;
           stepX += stepSize;
       }
-      //console.log('step x and y '+x+' '+y);
       //drawBlocks(blocks, 'orange');
+      graph = new Astar.Graph(nodes);
   }
 
-  function isStepBlocked(point, stepSize){
+  function convertObstructionsToSAT(){
+      var i, //iterate obstructions
+          j, //iterate vertices
+          v, //current obstruction's array of SAT vectors
+          o; //current obstruction
+
+      var obstructionsSAT = [];
+
+      if(obstructions.length){
+          for(i=0; i < obstructions.length; i++){
+              o = obstructions[i];
+              v = [];
+              for(j=0; j < o.vertices.length; j++){
+                  v.push(new Sat.Vector(o.vertices[j].x,o.vertices[j].y));
+              }
+              obstructionsSAT.push(new Sat.Polygon(new Sat.Vector(o.x, o.y), v));
+          }
+      }
+
+      obstructions = obstructionsSAT;
+  }
+
+  function isNodeBlocked(point, stepSize){
       if(obstructions.length > 0){
           var stepper = new Sat.Box(new Sat.Vector(point.x,point.y), stepSize, stepSize).toPolygon();
-          for(var i = 0; i < obstructionSAT.length; i++){
-              if(Sat.testPolygonPolygon(stepper, obstructionSAT[i])){
+          for(var i = 0; i < obstructions.length; i++){
+              if(Sat.testPolygonPolygon(stepper, obstructions[i])){
                   return true;
               }
           }
@@ -109,11 +108,12 @@ Item {
   }
 
   //http://playtechs.blogspot.ca/2007/03/raytracing-on-grid.html
-  function lineOfSite(pointA, pointB) {
-    var x0 = pointA.x;
-    var y0 = pointA.y;
-    var x1 = pointB.x;
-    var y1 = pointB.y;
+  //test line of site across nodes
+  function lineOfSite(nodeA, nodeB) {      
+    var x0 = nodeA.x;
+    var y0 = nodeA.y;
+    var x1 = nodeB.x;
+    var y1 = nodeB.y;
 
     var dx = Math.abs(x1 - x0);
     var dy = Math.abs(y1 - y0);
@@ -156,11 +156,8 @@ Item {
         error -= (y0 - Math.floor(y0)) * dx;
     }
 
-      //console.log('n is '+n);
     for (; n > 0; --n) {
 
-        //console.log('node ['+(x)+','+(y)+'] = ');
-          //      console.log(nodes[x][y]);
         if (nodes[x][y] === 0) {
             return false;
         }
@@ -178,27 +175,31 @@ Item {
     return true;
   }
 
-  function getPath(start, end) {
+  function getWaypoints(start, end) {
+    var waypoints = [end];
 
-      var graph = new Astar.Graph(nodes);
+    graph = new Astar.Graph(nodes); //do not remove
 
-      var startX = Math.floor(start.x/stepSize)-1;
-      var startY = Math.floor(start.y/stepSize)-1;
-      var endX = Math.floor(end.x/stepSize)-1;
-      var endY = Math.floor(end.y/stepSize)-1;
-      var startNode = graph.grid[startX][startY];
-      var endNode = graph.grid[endX][endY];
+    var startNode = graph.grid[Math.floor(start.x/stepSize)-1][Math.floor(start.y/stepSize)-1];
+    var endNode = graph.grid[Math.floor(end.x/stepSize)-1][Math.floor(end.y/stepSize)-1];
 
-      console.log('startnode '+startNode);
-      console.log('endnode '+endNode);
-      //console.log('line of site: '+lineOfSite(Qt.point(startX, startY), Qt.point(endX, endY)));
+    //shortcut pathing if end point is within line of site
+    if(!lineOfSite(startNode, endNode)) {
+        var path = Astar.astar.search(graph, startNode, endNode, {closest: true});
+        path = smoothPath(path);
+        waypoints = convertPathToWaypoints(path);
+        waypoints = setStartpoint(waypoints);
+        waypoints = setEndpoint(waypoints, end);
+    }
 
-      var path = Astar.astar.search(graph, startNode, endNode, {heuristic: Astar.astar.heuristics.diagonal, closest: true});
+    return waypoints;
+  }
 
-      //smooth the path
-      //console.log('path before: '+path);
+  //remove redundant steps in the path
+  function smoothPath(path){
+      var from = 0;
+
       if(path.length > 2){
-          var from = 0;
           while(from+2 < path.length){
               if(lineOfSite(path[from], path[from+2])){
                   path.splice(from+1, 1);
@@ -208,28 +209,82 @@ Item {
           }
       }
 
-      //console.log('path after: '+path);
-
-      //convert path back to x,y
-      var point;
-      for(var i = 0; i < path.length; i++){
-          point = path[i];
-          path[i].x = point.x*stepSize;
-          path[i].y = point.y*stepSize;
-      }
-
-      //drawBlocks(path, 'purple');
-
-      //get to the clicked point
-      if(path.length === 2){
-          path.pop();
-      }
-
-      path.push(end);
-
-      path.shift();
       return path;
   }
+
+  //convert path back to x,y coordinates, traveling through the center of the blocks
+  function convertPathToWaypoints(path){
+      var waypoints = path;
+      var w;
+
+      for(var i = 0; i < waypoints.length; i++){
+          w = waypoints[i];
+          waypoints[i].x = ((w.x+1)*stepSize);
+          waypoints[i].y = ((w.y+1)*stepSize);
+      }
+
+      return waypoints;
+  }
+
+  //remove the starting waypoint
+  function setStartpoint(waypoints){
+      waypoints.shift();
+      return waypoints;
+  }
+
+  //if the endpoint is inside the last waypoint block,
+  //replace the last waypoint with the actual point
+  function setEndpoint(waypoints, end){
+      var ln = waypoints[waypoints.length-1]; //lastNode
+      /*
+      var lnVerts = [
+                  [ln.x-(stepSize/2),ln.y-(stepSize/2)],
+                  [ln.x+(stepSize/2),ln.y-(stepSize/2)],
+                  [ln.x+(stepSize/2),ln.y+(stepSize/2)],
+                  [ln.x-(stepSize/2),ln.y+(stepSize/2)],
+                  [ln.x-(stepSize/2),ln.y-(stepSize/2)]
+              ];
+              */
+      var lnVerts = [
+                  [ln.x,ln.y],
+                  [ln.x+stepSize,ln.y],
+                  [ln.x+stepSize,ln.y+stepSize],
+                  [ln.x,ln.y+stepSize],
+                  [ln.x,ln.y]
+              ];
+      //drawBlocks([Qt.point(ln.x-(stepSize/2), ln.y-(stepSize/2))], 'green');
+      if(Utility.pointInPoly(end, lnVerts)){
+          waypoints.pop();
+          waypoints.push(end);
+      }
+
+      return waypoints;
+  }
+
+
+
+  signal drawBlocks(var blocks, var color);
+  onDrawBlocks: {
+      drawBlocksNow(blocks, color);
+  }
+
+  EntityManager {
+      id: testGrid
+      entityContainer: roomBase
+      dynamicCreationEntityList: []
+  }
+
+  function drawBlocksNow(blocks, color) {
+      if(blocks.length > 0){
+      for(var i = 0; i < blocks.length; i++){
+
+          testGrid.createEntityFromUrlWithProperties(
+                      Qt.resolvedUrl("Block.qml"), {"x": blocks[i].x, "y": blocks[i].y, 'color': color});
+
+      }
+      }
+  }
+
 
 }
 
