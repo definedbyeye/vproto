@@ -76,7 +76,7 @@ SceneBase {
                 //activePlayer.moveTo(mouseX, mouseY)
                 var start = mapToItem(activeRoom, activePlayer.colliderX, activePlayer.colliderY);
                 var end = mapToItem(activeRoom, mouseX, mouseY);
-                activePlayer.waypoints = activeRoom.getPath(start, end);
+                activePlayer.movePlayer(activeRoom.getWaypoints(start, end), end);
             }
         }
 
@@ -89,7 +89,7 @@ SceneBase {
 
             onLoaded: {
                 activeRoom = item;
-                activeRoom.initGraph();
+                activeRoom.loaded();
                 activeRoom.placePlayer(activePlayer, fromAreaId);
             }
         }

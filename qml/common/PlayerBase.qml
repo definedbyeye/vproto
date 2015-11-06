@@ -10,89 +10,108 @@ EntityBase {
     property real mediaScale: 1
 
     property int colliderX: x + width/2
-    property int colliderY: y + height - 5
+    property int colliderY: y + height - 1
 
-    property var moveToPoint: null;
+    property var targetPoint: null;
     property var waypoints: [];
+    property var movingToPoint: null;
 
     signal waypointReached
     signal targetReached
-    signal targetIsClose
-    signal moveStopped
+    signal targetOutOfReach
 
     function placePlayer(point) {
         x = point.x-(width/2);
-        y = point.y = height + 5;
+        y = point.y = height + 1;
+    }
+
+    function movePlayer(waypoints, targetPoint) {
+        cancelMovement();
+        playerBase.targetPoint = targetPoint;
+        playerBase.waypoints = waypoints;
     }
 
     onWaypointsChanged: {
-        //console.log('onWaypointsChanged, update movetopoint to: '+waypoints[0]);
         if(waypoints.length) {
-            moveToPoint = waypoints[0];
-            move();
+            move(waypoints[0]);
         }
     }
-
-    /*
-    onMoveToPointChanged: {        
-        if(moveToPoint != null){
-            console.log('onMoveTOPointChanged: from '+colliderX+','+colliderY+' to '+moveToPoint.x+','+moveToPoint.y);
-            move();
-        }
-    }
-    */
 
     onWaypointReached: {
-        //console.log('onWaypointREached: waypoints length ' + waypoints.length);
-        waypoints.shift();
-        if(waypoints.length === 0){
-            console.log('REACHED END OF PATH');
-            targetReached();
+
+        playerCollider.linearVelocity = Qt.point(0,0);
+
+        //did we just complete the last waypoint?
+        if(waypoints.length-1 === 0){
+            if(waypoints[0] === targetPoint){
+                targetReached();
+            } else {
+                targetOutOfReach();
+            }
+
+        //otherwise, update waypoints to move to the next waypoint
         } else {
-            moveToPoint = waypoints[0];
-            move();
+            waypoints = waypoints.slice(1);
         }
+
+    }
+
+    onTargetReached: {
+        console.log('TARGET REACHED');
+        cancelMovement();
+    }
+
+    onTargetOutOfReach: {
+        console.log('TARGET OUT OF REACH');
+        cancelMovement();
     }
 
     function isWaypointReached() {
-        var toX = moveToPoint.x
-        var toY = moveToPoint.y
+        var toX = movingToPoint.x;
+        var toY = movingToPoint.y;
 
+        var diffX = movingToPoint.x - colliderX;
+        var diffY = movingToPoint.y - colliderY;
+
+        //is the player already standing near the point?
+        if(Math.abs(diffY) < 10 && Math.abs(diffX) < 10){
+            playerCollider.linearVelocity = Qt.point(0,0);
+            waypointReached();
+            return;
+        }
+
+        /*
+        // since the user may have overshot the point due to signal lags,
+        // use this catch-all check vs a simple diff check
         if((direction === "NW" && colliderX <= toX && colliderY <= toY)
          || (direction === "NE" && colliderX > toX && colliderY <= toY)
          || (direction === "SE" && colliderX > toX && colliderY > toY)
          || (direction === "SW" && colliderX <= toX && colliderY > toY)) {
             playerCollider.linearVelocity = Qt.point(0,0);
-            //console.log('STOP');
             waypointReached();
         }
-    }
-
-    onTargetReached: {
-        moveToPoint = null;
+        */
     }
 
     //todo: throttle this?
     onXChanged: {
-            if(moveToPoint){
+            if(movingToPoint){
                 isWaypointReached()
             }
         }
     onYChanged: {
-            if(moveToPoint){
+            if(movingToPoint){
                 isWaypointReached()
             }
         }
 
     function move() {
+        movingToPoint = waypoints[0];
 
+        var diffX = movingToPoint.x - colliderX;
+        var diffY = movingToPoint.y - colliderY;
 
-        var diffX = moveToPoint.x - colliderX
-        var diffY = moveToPoint.y - colliderY
-
-        //console.log('moving... '+colliderX+','+colliderY+' to '+moveToPoint.x+','+moveToPoint.y);
-
-        //is the player already standing on the point?
+        //is the player already standing near the point?
         if(Math.abs(diffY) < 2 && Math.abs(diffX) < 2){
             waypointReached();
             return;
@@ -102,17 +121,27 @@ EntityBase {
 
         playerCollider.linearVelocity = Qt.point(diffX*newSpeed, diffY*newSpeed)
 
+        /*
+        // set movement direction (four-point for now)
         if(playerCollider.linearVelocity.x <= 0 && playerCollider.linearVelocity.y <= 0) {direction = "NW"}
         else if(playerCollider.linearVelocity.x > 0 && playerCollider.linearVelocity.y <= 0) {direction = "NE"}
         else if(playerCollider.linearVelocity.x > 0 && playerCollider.linearVelocity.y > 0) {direction = "SE"}
         else if(playerCollider.linearVelocity.x <= 0 && playerCollider.linearVelocity.y > 0) {direction = "SW"}
+        */
+    }
+
+    function cancelMovement() {
+        playerCollider.linearVelocity = Qt.point(0,0);
+        waypoints = [];
+        movingToPoint = null;
+        targetPoint = null;
     }
 
     BoxCollider {
         id: playerCollider
 
         height: 1
-        width: 10
+        width: 1
         anchors.horizontalCenter: playerBase.horizontalCenter
         anchors.bottom: playerBase.bottom
 
@@ -120,9 +149,11 @@ EntityBase {
 
         collisionTestingOnlyMode: false
 
+        //safety check to ensure player doesn't step into an obstacle
         fixture.onBeginContact: {
             playerCollider.linearVelocity = Qt.point(0,0);
-            moveStopped();
+            console.log('Player ran into an obstacle.  Ouch! at '+x + ',' + y);
+            //targetReached();
         }
     }
 

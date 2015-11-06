@@ -20,7 +20,7 @@ EntityBase {
 
             switch(s.type){
                 case 'moveTo':
-                    state += 'StateChangeScript { script: activePlayer.waypoints = activeRoom.getPath(mapToItem(activeRoom, activePlayer.colliderX, activePlayer.colliderY), mapToItem(activeRoom, '+s.x+','+s.y+'))} ';
+                    state += 'StateChangeScript { script: activePlayer.waypoints = activeRoom.getWaypoints(mapToItem(activeRoom, activePlayer.colliderX, activePlayer.colliderY), mapToItem(activeRoom, '+s.x+','+s.y+'))} ';
                     state += 'PropertyChanges { target: gameScene; ';
                     state += parseEvents(s.events);                    
                     state += '} ';                    
