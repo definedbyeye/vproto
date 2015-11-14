@@ -6,8 +6,8 @@ PlayerBase {
     id: mainPlayer
     entityId: mainPlayer
 
-    width: 57
-    height: 192
+    width: 5 //57
+    height: 5 //192
 
 
     // here you could use a SpriteSquenceVPlay to animate your player

@@ -54,12 +54,14 @@ SceneBase {
         height: activeRoom ? activeRoom.height : gameScene.height;
         width: activeRoom ? activeRoom.width: gameScene.width;
 
+        /*
         PhysicsWorld {
             id: physicsWorld
             gravity: Qt.point(0,0)
             debugDrawVisible: true // enable this for physics debugging
             z: 1000
         }
+        */
 
         //mouse layer captures clicks if no overlaying layers intercept first
         MouseArea {

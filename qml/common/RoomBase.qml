@@ -38,8 +38,8 @@ Item {
   onLoaded: {
       //todo: save generated nodes and graph to db
       if(!init){
-        initGraph();
-        init = true;
+        //initGraph();
+        //init = true;
       }
   }
 
@@ -111,7 +111,8 @@ Item {
 
   //http://playtechs.blogspot.ca/2007/03/raytracing-on-grid.html
   //test line of site across nodes
-  function lineOfSite(nodeA, nodeB) {      
+  function lineOfSite(nodeA, nodeB) {
+      console.log('line of site: '+nodeA.x+','+nodeA.y+' '+nodeB.x+','+nodeB.y);
     var x0 = nodeA.x;
     var y0 = nodeA.y;
     var x1 = nodeB.x;
@@ -183,18 +184,18 @@ Item {
 
     graph = new Astar.Graph(nodes); //do not remove
 
-    var startNode = graph.grid[Math.floor(start.y/stepSize)-1][Math.floor(start.x/stepSize)-1];
-    var endNode = graph.grid[Math.floor(end.y/stepSize)-1][Math.floor(end.x/stepSize)-1];
+    var startNode = graph.grid[Math.floor(start.y/stepSize)][Math.floor(start.x/stepSize)];
+    var endNode = graph.grid[Math.floor(end.y/stepSize)][Math.floor(end.x/stepSize)];
 
     //shortcut pathing if end point is within line of site
-    if(!lineOfSite(startNode, endNode)) {
+    //if(!lineOfSite(startNode, endNode)) {
         console.log('-- not line of site');
         var path = Astar.astar.search(graph, startNode, endNode, {closest: true});
-        path = smoothPath(path);
+        //path = smoothPath(path);
         waypoints = convertPathToWaypoints(path);
-        waypoints = setStartpoint(waypoints);
+        //waypoints = setStartpoint(waypoints);
         waypoints = setEndpoint(waypoints, end);
-    }
+    //}
 
       drawBlocks(waypoints, 'yellow');
 

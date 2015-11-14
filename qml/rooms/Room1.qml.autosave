@@ -35,10 +35,10 @@ RoomBase {
             color: "lightblue"
         }
 
-
       PathMovement {
         velocity: 50
         loops: Animation.Infinite
+        rotationAnimationEnabled : false
 
         waypoints: [
           {x:300, y:50},

@@ -26,10 +26,34 @@ EntityBase {
     }
 
     function movePlayer(waypoints, targetPoint) {
-        cancelMovement();
+        //cancelMovement();
         playerBase.targetPoint = targetPoint;
-        playerBase.waypoints = waypoints;
+        path.waypoints = waypoints;
+        path.start();
     }
+
+
+    PathMovement {
+        id: path
+          velocity: 1
+          //rotationAnimationDuration: 200
+
+          /*
+          waypoints: [
+            {x:0, y:0},
+            {x:100, y:0},
+            {x:100,  y:100},
+            {x:0, y:100}
+          ]
+          */
+
+          onPathCompleted: {
+              console.log('Path completed');
+          }
+      }
+
+
+    /*
 
     onWaypointsChanged: {
         if(waypoints.length) {
@@ -42,12 +66,16 @@ EntityBase {
         playerCollider.linearVelocity = Qt.point(0,0);
 
         //did we just complete the last waypoint?
+
         if(waypoints.length-1 === 0){
+
             if(waypoints[0] === targetPoint){
+                console.log('waypoints 0 is target');
                 targetReached();
             } else {
                 targetOutOfReach();
             }
+
 
         //otherwise, update waypoints to move to the next waypoint
         } else {
@@ -58,6 +86,8 @@ EntityBase {
 
     onTargetReached: {
         console.log('TARGET REACHED');
+        console.log('target: '+targetPoint.x+','+targetPoint.y);
+        console.log('actual: '+colliderX+','+colliderY);
         cancelMovement();
     }
 
@@ -70,27 +100,31 @@ EntityBase {
         var toX = movingToPoint.x+5;
         var toY = movingToPoint.y+5;
 
+
         var diffX = movingToPoint.x - colliderX;
         var diffY = movingToPoint.y - colliderY;
 
         //is the player already standing near the point?
-        if(Math.abs(diffY) < 5 && Math.abs(diffX) < 5){
+        if(Math.abs(diffY) < 3 && Math.abs(diffX) < 3){
             playerCollider.linearVelocity = Qt.point(0,0);
             waypointReached();
             return;
         }
 
-        /*
+        console.log('velocity: '+playerCollider.linearVelocity);
+        var lv = playerCollider.linearVelocity;
         // since the user may have overshot the point due to signal lags,
         // use this catch-all check vs a simple diff check
-        if((direction === "NW" && colliderX <= toX && colliderY <= toY)
-         || (direction === "NE" && colliderX > toX && colliderY <= toY)
-         || (direction === "SE" && colliderX > toX && colliderY > toY)
-         || (direction === "SW" && colliderX <= toX && colliderY > toY)) {
+        if(
+             (lv.x <= 0 && lv.y <= 0 && colliderX <= toX && colliderY <= toY)   //NW
+         || (lv.x >= 0 && lv.y <= 0 && colliderX >= toX && colliderY <= toY)   //NE
+         || (lv.x >= 0 && lv.y >= 0 && colliderX >= toX && colliderY >= toY)   //SE
+         || (lv.x <= 0 && lv.y >= 0 && colliderX <= toX && colliderY >= toY)   //SW
+            ) {
             playerCollider.linearVelocity = Qt.point(0,0);
             waypointReached();
         }
-        */
+
     }
 
     //todo: throttle this?
@@ -121,13 +155,13 @@ EntityBase {
 
         playerCollider.linearVelocity = Qt.point(diffX*newSpeed, diffY*newSpeed)
 
-        /*
+
         // set movement direction (four-point for now)
         if(playerCollider.linearVelocity.x <= 0 && playerCollider.linearVelocity.y <= 0) {direction = "NW"}
         else if(playerCollider.linearVelocity.x > 0 && playerCollider.linearVelocity.y <= 0) {direction = "NE"}
         else if(playerCollider.linearVelocity.x > 0 && playerCollider.linearVelocity.y > 0) {direction = "SE"}
         else if(playerCollider.linearVelocity.x <= 0 && playerCollider.linearVelocity.y > 0) {direction = "SW"}
-        */
+
     }
 
     function cancelMovement() {
@@ -156,6 +190,8 @@ EntityBase {
             //targetReached();
         }
     }
+
+    */
 
 }
 
