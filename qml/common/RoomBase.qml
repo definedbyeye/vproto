@@ -44,7 +44,8 @@ Item {
   }
 
   function placePlayer(player, fromAreaId) {
-      player.placePlayer(defaultPlayerPoint);
+      player.x = defaultPlayerPoint.x;
+      player.y = defaultPlayerPoint.y;
   }
 
   function initGraph(){
@@ -56,20 +57,21 @@ Item {
 
       convertObstructionsToSAT();
 
-      while(stepX <= width) {
-          while(stepY <= height) {
+      while(stepY <= height) {
+          while(stepX <= width) {
             row.push(isNodeBlocked(Qt.point(stepX, stepY), stepSize) ? 0 : 1);
-              //if(!isNodeBlocked(Qt.point(stepX, stepY), stepSize) ? 0 : 1){
-              //    blocks.push(Qt.point(stepX,stepY));
-              //};
-            stepY += stepSize;
+              if(!isNodeBlocked(Qt.point(stepX, stepY), stepSize) ? 0 : 1){
+                  blocks.push(Qt.point(stepX,stepY));
+              };
+            stepX += stepSize;
           }
-          nodes.unshift(row);
+          nodes.push(row);
           row = [];          
-          stepY = 0;
-          stepX += stepSize;
+          stepX = 0;
+          stepY += stepSize;
       }
-      //drawBlocks(blocks, 'orange');
+
+      drawBlocks(blocks, 'orange');
       graph = new Astar.Graph(nodes);
   }
 
@@ -95,11 +97,12 @@ Item {
       obstructions = obstructionsSAT;
   }
 
-  function isNodeBlocked(point, stepSize){
+  //tests if the node overlaps any of our obstruction polygons
+  function isNodeBlocked(node, stepSize){
       if(obstructions.length > 0){
-          var stepper = new Sat.Box(new Sat.Vector(point.x,point.y), stepSize, stepSize).toPolygon();
+          var block = new Sat.Box(new Sat.Vector(node.x,node.y), stepSize, stepSize).toPolygon();
           for(var i = 0; i < obstructions.length; i++){
-              if(Sat.testPolygonPolygon(stepper, obstructions[i])){
+              if(Sat.testPolygonPolygon(block, obstructions[i])){
                   return true;
               }
           }
@@ -109,7 +112,7 @@ Item {
 
   //http://playtechs.blogspot.ca/2007/03/raytracing-on-grid.html
   //test line of site across nodes
-  function lineOfSite(nodeA, nodeB) {      
+  function lineOfSite(nodeA, nodeB) {
     var x0 = nodeA.x;
     var y0 = nodeA.y;
     var x1 = nodeB.x;
@@ -172,25 +175,28 @@ Item {
         }
 
     }
+
     return true;
   }
 
   function getWaypoints(start, end) {
-    var waypoints = [end];
+    var waypoints = [start,end];
 
     graph = new Astar.Graph(nodes); //do not remove
 
-    var startNode = graph.grid[Math.floor(start.x/stepSize)-1][Math.floor(start.y/stepSize)-1];
-    var endNode = graph.grid[Math.floor(end.x/stepSize)-1][Math.floor(end.y/stepSize)-1];
+    var startNode = graph.grid[Math.floor(start.y/stepSize)][Math.floor(start.x/stepSize)];
+    var endNode = graph.grid[Math.floor(end.y/stepSize)][Math.floor(end.x/stepSize)];
 
     //shortcut pathing if end point is within line of site
     if(!lineOfSite(startNode, endNode)) {
         var path = Astar.astar.search(graph, startNode, endNode, {closest: true});
         path = smoothPath(path);
         waypoints = convertPathToWaypoints(path);
-        waypoints = setStartpoint(waypoints);
+        waypoints = setStartpoint(waypoints, start);
         waypoints = setEndpoint(waypoints, end);
     }
+
+      drawBlocks(waypoints, 'yellow');
 
     return waypoints;
   }
@@ -215,45 +221,31 @@ Item {
   //convert path back to x,y coordinates, traveling through the center of the blocks
   function convertPathToWaypoints(path){
       var waypoints = path;
-      var w;
+      var x,y;
 
       for(var i = 0; i < waypoints.length; i++){
-          w = waypoints[i];
-          waypoints[i].x = ((w.x+1)*stepSize);
-          waypoints[i].y = ((w.y+1)*stepSize);
+          x = waypoints[i].x;
+          y = waypoints[i].y;
+          waypoints[i].y = (x*stepSize)+stepSize/2;
+          waypoints[i].x = (y*stepSize)+stepSize/2;
       }
 
       return waypoints;
   }
 
   //remove the starting waypoint
-  function setStartpoint(waypoints){
+  function setStartpoint(waypoints, start){
       waypoints.shift();
+      waypoints.unshift(start);
       return waypoints;
   }
 
-  //if the endpoint is inside the last waypoint block,
-  //replace the last waypoint with the actual point
+  //if the endpoint is inside the last waypoint block, replace the last waypoint with the actual point
   function setEndpoint(waypoints, end){
-      var ln = waypoints[waypoints.length-1]; //lastNode
-      /*
-      var lnVerts = [
-                  [ln.x-(stepSize/2),ln.y-(stepSize/2)],
-                  [ln.x+(stepSize/2),ln.y-(stepSize/2)],
-                  [ln.x+(stepSize/2),ln.y+(stepSize/2)],
-                  [ln.x-(stepSize/2),ln.y+(stepSize/2)],
-                  [ln.x-(stepSize/2),ln.y-(stepSize/2)]
-              ];
-              */
-      var lnVerts = [
-                  [ln.x,ln.y],
-                  [ln.x+stepSize,ln.y],
-                  [ln.x+stepSize,ln.y+stepSize],
-                  [ln.x,ln.y+stepSize],
-                  [ln.x,ln.y]
-              ];
-      //drawBlocks([Qt.point(ln.x-(stepSize/2), ln.y-(stepSize/2))], 'green');
-      if(Utility.pointInPoly(end, lnVerts)){
+      var lastPoint = waypoints[waypoints.length-1];
+      var lastNode = new Sat.Box(new Sat.Vector(lastPoint.x,lastPoint.y), stepSize, stepSize).toPolygon();
+
+      if(Sat.pointInPolygon(end, lastNode)){
           waypoints.pop();
           waypoints.push(end);
       }
@@ -277,11 +269,9 @@ Item {
   function drawBlocksNow(blocks, color) {
       if(blocks.length > 0){
       for(var i = 0; i < blocks.length; i++){
-
           testGrid.createEntityFromUrlWithProperties(
                       Qt.resolvedUrl("Block.qml"), {"x": blocks[i].x, "y": blocks[i].y, 'color': color});
-
-      }
+        }
       }
   }
 

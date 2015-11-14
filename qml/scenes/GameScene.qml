@@ -29,7 +29,8 @@ SceneBase {
     property string activePlayerId
     property variant activePlayer
     signal playerStopped;
-    signal playerReachedTarget;
+    signal playerTargetReached;
+    signal playerTargetOutOfReach;
 
     //TODO: clean these up with aliases or something
     property variant activePanel
@@ -65,32 +66,38 @@ SceneBase {
         MouseArea {
             id: clickToMove
             anchors.fill: viewPort;
-
-            property real pressedY: 0
             propagateComposedEvents: true
 
-            onPressed: {
-                pressedY = mouseY + (gameScene.height - activeRoom.height);
+            onReleased: {
+                var start = Qt.point(player.x, player.y);
+                var end = Qt.point(mouse.x,mouse.y);
+                var waypoints = activeRoom.getWaypoints(start, end);
+                player.move(waypoints, end);
             }
-            onReleased: {                
-                //activePlayer.moveTo(mouseX, mouseY)
-                var start = mapToItem(activeRoom, activePlayer.colliderX, activePlayer.colliderY);
-                var end = mapToItem(activeRoom, mouseX, mouseY);
-                activePlayer.movePlayer(activeRoom.getWaypoints(start, end), end);
-            }
+        }
+
+        Player {
+            id: player
+            z: 200
+
+            onTargetReached: storage.savePlayerPoint(Qt.point(target.x, target.y));
+            onTargetOutOfReach: storage.savePlayerPoint(Qt.point(target.x, target.y));
+
+            //onYChanged: updatePlayerScale();
+            onXChanged: updateRoomOffset();
         }
 
         // load levels at runtime
         Loader {
             id: roomLoader
             source: ''
-
             property string fromAreaId: ''
-
             onLoaded: {
                 activeRoom = item;
                 activeRoom.loaded();
-                activeRoom.placePlayer(activePlayer, fromAreaId);
+                //todo: replace with a "setplayer" function accounting for areaid
+                player.x = activeRoom.defaultPlayerPoint.x;
+                player.y = activeRoom.defaultPlayerPoint.y;
             }
         }
         Connections {
@@ -98,32 +105,9 @@ SceneBase {
             target: activeRoom !== undefined ? activeRoom : null        
             onGoToRoomIdChanged: {
                 setRoom(target.goToRoomId, target.fromAreaId);
-                updatePlayerScale();
+                //updatePlayerScale();
             }
         }        
-
-        Loader {
-            id: playerLoader
-            source: ''
-            onLoaded: {
-                activePlayer = item
-            }
-        }
-        Connections {
-            target: activePlayer !== undefined ? activePlayer : null
-            /*
-            onMoveStopped: {
-                gameScene.playerStopped();
-                storage.savePlayerPoint(Qt.point(target.x, target.y));
-            }
-            */
-            onTargetReached: {
-                storage.savePlayerPoint(Qt.point(target.x, target.y));
-                gameScene.playerReachedTarget();
-            }
-            onYChanged: updatePlayerScale();
-            onXChanged: updateRoomOffset();
-        }
 
         // Pressing MouseArea.dragFromFrame inits this
         // collider with an inventory ID and starts dragging the
@@ -159,7 +143,7 @@ SceneBase {
 
         }
 
-    }
+    } // --- end of viewport -------------------
 
     ActiveInventoryFrame{
         id: activeInventoryFrame
@@ -173,6 +157,7 @@ SceneBase {
         id: scripted
     }
 
+    /* ------------- panel loader -------------- */
     Loader {
         id: panelLoader
         anchors.fill: parent
@@ -185,7 +170,6 @@ SceneBase {
             }
         }
     }
-
     Connections {
         target: activePanel !== undefined ? activePanel : null
         onPanelOpt1: panelOpt1();
@@ -197,9 +181,9 @@ SceneBase {
         onClose: {panelLoader.source = ''; gameScene.panelClosed();}
     }   
 
-
     //inventory panel visual helper (on top of the panels for save/load controls later)
     Rectangle {
+        id: inventoryPanelHelper
         color: "white"
         opacity: .2
 
@@ -241,16 +225,11 @@ SceneBase {
         onClicked: { console.log('POINT: ' + mouseX + ', ' + mouseY); mouse.accepted = false;}
     }
 
-
-
-
     function init() {
         var gameState = storage.getPlayerState();
 
         setPlayer(gameState.playerId);
         setRoom(gameState.roomId);
-        activePlayer.x = gameState.x;
-        activePlayer.y = gameState.y;
 
         initInventory();
     }
@@ -276,7 +255,7 @@ SceneBase {
     function setPlayer(playerId) {
 
         activePlayerId = playerId;
-        playerLoader.source = "../players/" + activePlayerId.charAt(0).toUpperCase() + activePlayerId.slice(1) + '.qml';
+        //playerLoader.source = "../players/" + activePlayerId.charAt(0).toUpperCase() + activePlayerId.slice(1) + '.qml';
 
     }
 
@@ -293,7 +272,7 @@ SceneBase {
     function updateRoomOffset() {
         //if player is in the right half of the screen && there is more of the room to show to the right....
         var midPoint = gameScene.width/2;
-        var playerX = mapFromItem(activePlayer).x;
+        var playerX = mapFromItem(player).x;
         if(playerX > midPoint){
             if(viewPort.x > -(viewPort.width - gameScene.width)){
                 viewPort.x -= playerX - midPoint;

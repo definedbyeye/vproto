@@ -2,14 +2,19 @@ import VPlay 2.0
 import QtQuick 2.0
 import "../common"
 
-PlayerBase {
+EntityBase {
     id: mainPlayer
     entityId: mainPlayer
 
-    width: 57
-    height: 192
+    width: 25 //57
+    height: 25 //192
 
+    Rectangle {
+        anchors.fill: parent
+        color: 'purple'
+    }
 
+    /*
     // here you could use a SpriteSquenceVPlay to animate your player
     MultiResolutionImage {
         source: "../../assets/player/player.png"
@@ -19,6 +24,7 @@ PlayerBase {
         height: parent.height*parent.mediaScale
         z: 2000
     }
+    */
 
 }
 
