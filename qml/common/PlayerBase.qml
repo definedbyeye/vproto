@@ -67,14 +67,14 @@ EntityBase {
     }
 
     function isWaypointReached() {
-        var toX = movingToPoint.x;
-        var toY = movingToPoint.y;
+        var toX = movingToPoint.x+5;
+        var toY = movingToPoint.y+5;
 
         var diffX = movingToPoint.x - colliderX;
         var diffY = movingToPoint.y - colliderY;
 
         //is the player already standing near the point?
-        if(Math.abs(diffY) < 10 && Math.abs(diffX) < 10){
+        if(Math.abs(diffY) < 5 && Math.abs(diffX) < 5){
             playerCollider.linearVelocity = Qt.point(0,0);
             waypointReached();
             return;

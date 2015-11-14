@@ -271,4 +271,14 @@ RoomBase {
         ]
     }
 
+    Wall {
+        id: sampleObstruction
+        vertices: [
+            Qt.point(300, 300), // top left
+            Qt.point(300, 350), // bottom left
+            Qt.point(305, 350), // bottom right
+            Qt.point(305, 300) // top right
+        ]
+    }
+
 }

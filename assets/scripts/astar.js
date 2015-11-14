@@ -229,7 +229,7 @@ Graph.prototype.neighbors = function(node) {
     return ret;
 };
 
-Graph.prototype.toString = function() {
+Graph.prototype.toString = function(start, end) {
     var graphString = [],
         nodes = this.grid, // when using grid
         rowDebug, row, y, l;
@@ -237,7 +237,7 @@ Graph.prototype.toString = function() {
         rowDebug = [];
         row = nodes[x];
         for (y = 0, l = row.length; y < l; y++) {
-            rowDebug.push(row[y].weight);
+                rowDebug.push(row[y].weight);
         }
         graphString.push(rowDebug.join(" "));
     }
