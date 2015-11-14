@@ -10,7 +10,7 @@ RoomBase {
     width: 1140
 
     // TODO: allow player to enter from multiple points
-    property point defaultPlayerPoint: Qt.point(200,120);
+    property point defaultPlayerPoint: Qt.point(200,300);
     property real defaultOffset: 0
 
     Component.onCompleted: {
@@ -22,34 +22,6 @@ RoomBase {
     MultiResolutionImage {        
         source: "../../assets/background/bg_testing_tables.png"
     }
-
-    EntityBase {
-        id: floatingSquare
-        width: 10
-        height: 10
-        x: 300
-        y: 50
-
-        Rectangle {
-            anchors.fill: parent
-            color: "lightblue"
-        }
-
-
-      PathMovement {
-        velocity: 50
-        loops: Animation.Infinite
-
-        waypoints: [
-          {x:300, y:50},
-          {x:300, y:100},
-          {x:200, y:100},
-          {x:200, y:50}
-          ]
-      }
-
-    }
-
 
     // interaction areas
 
@@ -112,8 +84,6 @@ RoomBase {
 
         }
     }
-
-
 
     InteractableBase {
         id: glass2
@@ -180,7 +150,6 @@ RoomBase {
         }
 
     }
-
 
     InteractableBase {
         areaVertices: [Qt.point(0,0), Qt.point(150, 0), Qt.point(100, 100), Qt.point(0, 200)]

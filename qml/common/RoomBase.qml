@@ -38,13 +38,14 @@ Item {
   onLoaded: {
       //todo: save generated nodes and graph to db
       if(!init){
-        //initGraph();
-        //init = true;
+        initGraph();
+        init = true;
       }
   }
 
   function placePlayer(player, fromAreaId) {
-      player.placePlayer(defaultPlayerPoint);
+      player.x = defaultPlayerPoint.x;
+      player.y = defaultPlayerPoint.y;
   }
 
   function initGraph(){
@@ -112,7 +113,6 @@ Item {
   //http://playtechs.blogspot.ca/2007/03/raytracing-on-grid.html
   //test line of site across nodes
   function lineOfSite(nodeA, nodeB) {
-      console.log('line of site: '+nodeA.x+','+nodeA.y+' '+nodeB.x+','+nodeB.y);
     var x0 = nodeA.x;
     var y0 = nodeA.y;
     var x1 = nodeB.x;
@@ -180,7 +180,7 @@ Item {
   }
 
   function getWaypoints(start, end) {
-    var waypoints = [end];
+    var waypoints = [start,end];
 
     graph = new Astar.Graph(nodes); //do not remove
 
@@ -188,14 +188,13 @@ Item {
     var endNode = graph.grid[Math.floor(end.y/stepSize)][Math.floor(end.x/stepSize)];
 
     //shortcut pathing if end point is within line of site
-    //if(!lineOfSite(startNode, endNode)) {
-        console.log('-- not line of site');
+    if(!lineOfSite(startNode, endNode)) {
         var path = Astar.astar.search(graph, startNode, endNode, {closest: true});
-        //path = smoothPath(path);
+        path = smoothPath(path);
         waypoints = convertPathToWaypoints(path);
-        //waypoints = setStartpoint(waypoints);
+        waypoints = setStartpoint(waypoints, start);
         waypoints = setEndpoint(waypoints, end);
-    //}
+    }
 
       drawBlocks(waypoints, 'yellow');
 
@@ -227,16 +226,17 @@ Item {
       for(var i = 0; i < waypoints.length; i++){
           x = waypoints[i].x;
           y = waypoints[i].y;
-          waypoints[i].y = x*stepSize;
-          waypoints[i].x = y*stepSize;
+          waypoints[i].y = (x*stepSize)+stepSize/2;
+          waypoints[i].x = (y*stepSize)+stepSize/2;
       }
 
       return waypoints;
   }
 
   //remove the starting waypoint
-  function setStartpoint(waypoints){
+  function setStartpoint(waypoints, start){
       waypoints.shift();
+      waypoints.unshift(start);
       return waypoints;
   }
 
