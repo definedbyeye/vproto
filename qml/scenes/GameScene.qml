@@ -14,8 +14,6 @@ import "../interface"
    Box.Category6 -- Obstruction (not a wall)
 */
 
-
-
 SceneBase {
     id: gameScene
 
@@ -31,6 +29,8 @@ SceneBase {
     signal playerStopped;
     signal playerTargetReached;
     signal playerTargetOutOfReach;
+
+    property variant playerThing
 
     //TODO: clean these up with aliases or something
     property variant activePanel
@@ -82,9 +82,11 @@ SceneBase {
 
             onTargetReached: storage.savePlayerPoint(Qt.point(target.x, target.y));
             onTargetOutOfReach: storage.savePlayerPoint(Qt.point(target.x, target.y));
-
-            //onYChanged: updatePlayerScale();
             onXChanged: updateRoomOffset();
+
+            Component.onCompleted: {
+                gameScene.playerThing = player;
+            }
         }
 
         // load levels at runtime
@@ -105,7 +107,6 @@ SceneBase {
             target: activeRoom !== undefined ? activeRoom : null        
             onGoToRoomIdChanged: {
                 setRoom(target.goToRoomId, target.fromAreaId);
-                //updatePlayerScale();
             }
         }        
 
@@ -257,15 +258,6 @@ SceneBase {
         activePlayerId = playerId;
         //playerLoader.source = "../players/" + activePlayerId.charAt(0).toUpperCase() + activePlayerId.slice(1) + '.qml';
 
-    }
-
-
-    //NOTE: does not actually change player item dimensions - that screws with too many calculations atm
-    function updatePlayerScale(){
-        var minP = activeRoom.minPerspective;
-        var maxP = activeRoom.maxPerspective;
-        var position = (activePlayer.y+activePlayer.height) / activeRoom.height;
-        activePlayer.mediaScale = ((maxP - minP) * position) + minP;
     }
 
     //TODO: save static numbers

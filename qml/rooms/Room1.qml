@@ -9,18 +9,69 @@ RoomBase {
     height: 360
     width: 1140
 
+    property alias playerSkin: playerSkin
+
     // TODO: allow player to enter from multiple points
     property point defaultPlayerPoint: Qt.point(200,300);
     property real defaultOffset: 0
+
+    property real minPerspective: .1
+    property real maxPerspective: 1
 
     Component.onCompleted: {
         viewPort.x = defaultOffset
         viewPort.anchors.bottom = gameScene.gameWindowAnchorItem.bottom;
     }
 
+    PlayerSkin {
+        id: playerSkin
+        z: 5
+    }
+
     // background
-    MultiResolutionImage {        
-        source: "../../assets/background/bg_testing_tables.png"
+    MultiResolutionImage {
+        z: 1
+        height: parent.height
+        source: "../../assets/background/sky.png"
+        fillMode: Image.TileHorizontally
+        verticalAlignment: Image.AlignLeft
+        anchors.fill: parent
+    }
+    MultiResolutionImage {
+        z: 2
+        height: 214
+        y: parent.height - 250
+        source: "../../assets/background/clouds.png"
+        fillMode: Image.TileHorizontally
+        anchors.left: parent.left
+    }
+    MultiResolutionImage {
+        z: 3
+        height: 121
+        width: parent.width
+        source: "../../assets/background/floor.png"
+        fillMode: Image.TileHorizontally
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+    }
+    MultiResolutionImage {
+        z: 4
+        width: 124
+        height: 63
+        x: 271
+        y: 274
+        source: "../../assets/background/table.png"
+    } 
+
+    MultiResolutionImage {
+        z: 6
+        height: 51
+        width: parent.width
+        source: "../../assets/background/post.png"
+        fillMode: Image.TileHorizontally
+        verticalAlignment: Image.AlignLeft
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
     }
 
     // interaction areas
@@ -28,6 +79,7 @@ RoomBase {
     InteractableBase {
         id: glass1
 
+        z:6
         x: 310
         y: 170
         width: 32
@@ -88,6 +140,7 @@ RoomBase {
     InteractableBase {
         id: glass2
 
+        z: 6
         x: 560
         y: 170
         width: 30
