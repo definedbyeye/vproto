@@ -72,14 +72,14 @@ Item {
         }
 
         onPressed: {
-            viewPort.dragActiveInventory.inventoryId = inventoryId;
-            viewPort.dragActiveInventory.visible = true;
+            roomScene.dragActiveInventory.inventoryId = inventoryId;
+            roomScene.dragActiveInventory.visible = true;
             activeInventory.dragging = true;
         }
         onReleased: {
             activeInventory.dragging = false;
-            viewPort.dragActiveInventory.dropped();
-            viewPort.dragActiveInventory.visible = false;
+            roomScene.dragActiveInventory.dropped();
+            roomScene.dragActiveInventory.visible = false;
             reset();
         }
         onPositionChanged: follow(mouse);
@@ -89,8 +89,8 @@ Item {
             activeInventory.x = mouse.x - activeInventory.width/2;
             activeInventory.y = mouse.y - activeInventory.height/2;
 
-            var drag = viewPort.dragActiveInventory;
-            var vp = mapToItem(viewPort, activeInventory.x, activeInventory.y);
+            var drag = roomScene.dragActiveInventory;
+            var vp = mapToItem(roomScene, activeInventory.x, activeInventory.y);
             drag.x = vp.x + 5;
             drag.y = vp.y + activeInventory.height - 5;
         }
@@ -99,8 +99,8 @@ Item {
             activeInventory.x = 0;
             activeInventory.y = 0;
 
-            var drag = viewPort.dragActiveInventory;
-            var vp = mapToItem(viewPort, 5, 5);
+            var drag = roomScene.dragActiveInventory;
+            var vp = mapToItem(roomScene, 5, 5);
             drag.x = vp.x;
             drag.y = vp.y + activeInventory.height - 5;
 

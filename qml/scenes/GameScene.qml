@@ -45,10 +45,14 @@ SceneBase {
     onActivePlayerIdChanged: storage.savePlayerId(activePlayerId);
     onActiveRoomIdChanged: storage.saveRoomId(activeRoomId);
 
-    // viewport contains the full room.  gamescene only shows part of it.
+    // roomScene contains the full room.  gamescene only shows part of it.
     // todo: flip the two names
     Item {
-        id: viewPort
+        id: roomScene
+
+        property real offset: 0
+
+        x: offset
 
         property alias dragActiveInventory: activeInventoryCollider
 
@@ -65,7 +69,7 @@ SceneBase {
         //mouse layer captures clicks if no overlaying layers intercept first
         MouseArea {
             id: clickToMove
-            anchors.fill: viewPort;
+            anchors.fill: roomScene;
             propagateComposedEvents: true
 
             onReleased: {
@@ -108,7 +112,7 @@ SceneBase {
             onGoToRoomIdChanged: {
                 setRoom(target.goToRoomId, target.fromAreaId);
             }
-        }        
+        }
 
         // Pressing MouseArea.dragFromFrame inits this
         // collider with an inventory ID and starts dragging the
@@ -144,7 +148,7 @@ SceneBase {
 
         }
 
-    } // --- end of viewport -------------------
+    } // --- end of roomScene -------------------
 
     ActiveInventoryFrame{
         id: activeInventoryFrame
@@ -216,7 +220,7 @@ SceneBase {
     //console log the mouse click for dev purposes
     MouseArea {
         id: logPoint
-        anchors.fill: viewPort;
+        anchors.fill: roomScene;
         propagateComposedEvents: true
         onPressed: mouse.accepted = false;
         onDoubleClicked: mouse.accepted = false;
@@ -266,12 +270,12 @@ SceneBase {
         var midPoint = gameScene.width/2;
         var playerX = mapFromItem(player).x;
         if(playerX > midPoint){
-            if(viewPort.x > -(viewPort.width - gameScene.width)){
-                viewPort.x -= playerX - midPoint;
+            if(roomScene.offset > -(roomScene.width - gameScene.width)){
+                roomScene.offset -= playerX - midPoint;
             }
         } else {
-            if(viewPort.x < 0){
-                viewPort.x -= playerX - midPoint;
+            if(roomScene.offset < 0){
+                roomScene.offset -= playerX - midPoint;
             }
 
         }

@@ -15,10 +15,6 @@ EntityBase {
     onMediaScaleChanged: {//console.log('media scale: '+mediaScale);
     }
 
-    Component.onCompleted: {
-        console.log('playerSkin completed. ' + x+','+y);
-    }
-
     MultiResolutionImage {
         id: playerImage
         source: "../../assets/player/player.png"
@@ -35,10 +31,12 @@ EntityBase {
     onYChanged: updatePlayerScale();
 
     function updatePlayerScale(){
-        var minP = gameScene.activeRoom.minPerspective;
-        var maxP = gameScene.activeRoom.maxPerspective;
-        var position = (y+height) / gameScene.activeRoom.height;
-        mediaScale = ((maxP - minP) * position) + minP;
+        if(gameScene.activeRoom){
+            var minP = gameScene.activeRoom.minPerspective;
+            var maxP = gameScene.activeRoom.maxPerspective;
+            var position = (y+height) / gameScene.activeRoom.height;
+            mediaScale = ((maxP - minP) * position) + minP;
+        }
     }
 
 }

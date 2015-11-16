@@ -15,13 +15,13 @@ RoomBase {
     property real defaultOffset: -(room2.width - gameScene.width);
 
     Component.onCompleted: {
-        viewPort.anchors.bottom = gameScene.gameWindowAnchorItem.bottom;
-        viewPort.x = defaultOffset
+        roomScene.anchors.bottom = gameScene.gameWindowAnchorItem.bottom;
+        roomScene.offset = defaultOffset
         /*
-        viewPort.anchors.top = undefined;
-        viewPort.anchors.left = undefined;
-        viewPort.anchors.bottom = gameScene.gameWindowAnchorItem.bottom;
-        viewPort.anchors.right = gameScene.gameWindowAnchorItem.right;
+        roomScene.anchors.top = undefined;
+        roomScene.anchors.left = undefined;
+        roomScene.anchors.bottom = gameScene.gameWindowAnchorItem.bottom;
+        roomScene.anchors.right = gameScene.gameWindowAnchorItem.right;
         */
     }
 

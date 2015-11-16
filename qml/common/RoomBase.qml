@@ -15,7 +15,7 @@ Item {
   property real defaultOffset: 0
 
   property point defaultPlayerPoint: Qt.point(0,0)
-  property real minPerspective: .1
+  property real minPerspective: 1
   property real maxPerspective: 1
 
   property string goToRoomId: ''
@@ -66,7 +66,7 @@ Item {
             stepX += stepSize;
           }
           nodes.push(row);
-          row = [];          
+          row = [];
           stepX = 0;
           stepY += stepSize;
       }
