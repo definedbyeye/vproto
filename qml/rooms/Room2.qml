@@ -12,16 +12,16 @@ RoomBase {
     //state machine this so player can enter from multiple points
     property point defaultPlayerPoint: Qt.point(900,120);
 
-    property real defaultOffset: -(room2.width - gameScene.width);
+    property point defaultOffset: Qt.point(-(room2.width - screen.width), 0);
 
     Component.onCompleted: {
-        viewPort.anchors.bottom = gameScene.gameWindowAnchorItem.bottom;
-        viewPort.x = defaultOffset
+        roomPanel.anchors.bottom = screen.gameWindowAnchorItem.bottom;
+        roomPanel.offset = defaultOffset
         /*
-        viewPort.anchors.top = undefined;
-        viewPort.anchors.left = undefined;
-        viewPort.anchors.bottom = gameScene.gameWindowAnchorItem.bottom;
-        viewPort.anchors.right = gameScene.gameWindowAnchorItem.right;
+        roomPanel.anchors.top = undefined;
+        roomPanel.anchors.left = undefined;
+        roomPanel.anchors.bottom = screen.gameWindowAnchorItem.bottom;
+        roomPanel.anchors.right = screen.gameWindowAnchorItem.right;
         */
     }
 

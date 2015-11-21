@@ -4,20 +4,13 @@ import QtQuick 2.0
 EntityBase {
     id: playerSkin
 
-    x: gameScene.playerThing.x-(width/2)
-    y: gameScene.playerThing.y-(height)
+    x: roomPanel.playerThing.x-(width/2)
+    y: roomPanel.playerThing.y-(height)
 
     height: 192
     width: 57
 
-    property double mediaScale: 1
-
-    onMediaScaleChanged: {//console.log('media scale: '+mediaScale);
-    }
-
-    Component.onCompleted: {
-        console.log('playerSkin completed. ' + x+','+y);
-    }
+    property double playerScale: 1
 
     MultiResolutionImage {
         id: playerImage
@@ -28,17 +21,19 @@ EntityBase {
         //x: -1 * width/2
         //y: -1 * height
 
-        height: parent.height*(mediaScale)
-        width: parent.width*(mediaScale)
+        height: parent.height
+        width: parent.width
     }
 
     onYChanged: updatePlayerScale();
 
     function updatePlayerScale(){
-        var minP = gameScene.activeRoom.minPerspective;
-        var maxP = gameScene.activeRoom.maxPerspective;
-        var position = (y+height) / gameScene.activeRoom.height;
-        mediaScale = ((maxP - minP) * position) + minP;
+        if(screen.activeRoom){
+            var minP = screen.activeRoom.minPerspective;
+            var maxP = screen.activeRoom.maxPerspective;
+            var position = (y+height) / screen.activeRoom.height;
+            playerScale = ((maxP - minP) * position) + minP;
+        }
     }
 
 }

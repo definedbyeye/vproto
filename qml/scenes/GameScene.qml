@@ -20,6 +20,8 @@ SceneBase {
     // the "logical size" - the scene content is auto-scaled to match the GameWindow size    
     height: 320
     width: 480
+    scaleMode: "zoomToBiggerSide"
+    sceneAlignmentY: "bottom"
 
     property string activeRoomId
     property variant activeRoom
@@ -29,8 +31,6 @@ SceneBase {
     signal playerStopped;
     signal playerTargetReached;
     signal playerTargetOutOfReach;
-
-    property variant playerThing
 
     //TODO: clean these up with aliases or something
     property variant activePanel
@@ -45,15 +45,22 @@ SceneBase {
     onActivePlayerIdChanged: storage.savePlayerId(activePlayerId);
     onActiveRoomIdChanged: storage.saveRoomId(activeRoomId);
 
-    // viewport contains the full room.  gamescene only shows part of it.
+    // roomPanel contains the full room.  gamescene only shows part of it.
     // todo: flip the two names
     Item {
-        id: viewPort
+        id: roomPanel
+
+        property variant playerThing
+
+        property point offset: Qt.point(0,0)
+
+        x: offset.x
+        y: offset.y
 
         property alias dragActiveInventory: activeInventoryCollider
 
-        height: activeRoom ? activeRoom.height : gameScene.height;
-        width: activeRoom ? activeRoom.width: gameScene.width;
+        height: (activeRoom ? activeRoom.height : screen.height);
+        width: (activeRoom ? activeRoom.width : screen.height);
 
         PhysicsWorld {
             id: physicsWorld
@@ -65,7 +72,7 @@ SceneBase {
         //mouse layer captures clicks if no overlaying layers intercept first
         MouseArea {
             id: clickToMove
-            anchors.fill: viewPort;
+            anchors.fill: roomPanel;
             propagateComposedEvents: true
 
             onReleased: {
@@ -85,7 +92,7 @@ SceneBase {
             onXChanged: updateRoomOffset();
 
             Component.onCompleted: {
-                gameScene.playerThing = player;
+                roomPanel.playerThing = player;
             }
         }
 
@@ -100,15 +107,17 @@ SceneBase {
                 //todo: replace with a "setplayer" function accounting for areaid
                 player.x = activeRoom.defaultPlayerPoint.x;
                 player.y = activeRoom.defaultPlayerPoint.y;
+                roomPanel.offset.x = activeRoom.defaultOffset.x
+                roomPanel.offset.y = activeRoom.defaultOffset.y
             }
         }
         Connections {
             // only connect if a level is loaded, to prevent errors
-            target: activeRoom !== undefined ? activeRoom : null        
+            target: activeRoom !== undefined ? activeRoom : null
             onGoToRoomIdChanged: {
                 setRoom(target.goToRoomId, target.fromAreaId);
             }
-        }        
+        }
 
         // Pressing MouseArea.dragFromFrame inits this
         // collider with an inventory ID and starts dragging the
@@ -144,87 +153,103 @@ SceneBase {
 
         }
 
-    } // --- end of viewport -------------------
+    } // --- end of roomPanel -------------------
 
-    ActiveInventoryFrame{
-        id: activeInventoryFrame
+    Rectangle {
+        color: 'blue'
+        width: 20
+        height: 20
+        x: 0
+        y: gameScene.height
     }
 
-    InventoryPanel {
-        id: inventoryPanel
-    }
+    Item {
+        id: screen
 
-    Scripted {
-        id: scripted
-    }
+        height: gameWindow.height
+        width: gameWindow.width
 
-    /* ------------- panel loader -------------- */
-    Loader {
-        id: panelLoader
-        anchors.fill: parent
-        onLoaded: {
-            activePanel = item
+        anchors.fill: gameWindowAnchorItem
+
+        ActiveInventoryFrame{
+            id: activeInventoryFrame
         }
-        onSourceChanged: {
-            if(source === null) {
-                activePanel = null;
+
+        InventoryPanel {
+            id: inventoryPanel
+        }
+
+        Scripted {
+            id: scripted
+        }
+
+        /* ------------- panel loader -------------- */
+        Loader {
+            id: panelLoader
+            anchors.fill: parent
+            onLoaded: {
+                activePanel = item
+            }
+            onSourceChanged: {
+                if(source === null) {
+                    activePanel = null;
+                }
             }
         }
-    }
-    Connections {
-        target: activePanel !== undefined ? activePanel : null
-        onPanelOpt1: panelOpt1();
-        onPanelOpt2: panelOpt2();
-        onPanelOpt3: panelOpt3();
-        onPanelOpt4: panelOpt4();
-        onPanelOpt5: panelOpt5();
-        onPanelOptCancel: panelOptCancel();
-        onClose: {panelLoader.source = ''; gameScene.panelClosed();}
-    }   
-
-    //inventory panel visual helper (on top of the panels for save/load controls later)
-    Rectangle {
-        id: inventoryPanelHelper
-        color: "white"
-        opacity: .2
-
-        anchors.top: gameScene.top;
-        anchors.left: gameScene.left;
-        anchors.right: gameScene.right;
-
-        height: 15;
-
-        MouseArea {
-            id: gameSceneUI
-            anchors.fill: parent
-            onReleased: inventoryPanel.show()
+        Connections {
+            target: activePanel !== undefined ? activePanel : null
+            onPanelOpt1: panelOpt1();
+            onPanelOpt2: panelOpt2();
+            onPanelOpt3: panelOpt3();
+            onPanelOpt4: panelOpt4();
+            onPanelOpt5: panelOpt5();
+            onPanelOptCancel: panelOptCancel();
+            onClose: {panelLoader.source = ''; screen.panelClosed();}
         }
-    }
 
-    Text {
-        id: roomTitle
+        //inventory panel visual helper (on top of the panels for save/load controls later)
+        Rectangle {
+            id: inventoryPanelHelper
+            color: "white"
+            opacity: .2
 
-        anchors.top: gameScene.top;
-        anchors.left: gameScene.left;
+            anchors.top: screen.top;
+            anchors.left: screen.left;
+            anchors.right: screen.right;
 
-        text: activeRoomId
+            height: 15;
 
-        z: 1005
+            MouseArea {
+                id: screenUI
+                anchors.fill: parent
+                onReleased: inventoryPanel.show()
+            }
+        }
 
-    }
+        Text {
+            id: roomTitle
 
-    //console log the mouse click for dev purposes
-    MouseArea {
-        id: logPoint
-        anchors.fill: viewPort;
-        propagateComposedEvents: true
-        onPressed: mouse.accepted = false;
-        onDoubleClicked: mouse.accepted = false;
-        onReleased: mouse.accepted = false;
-        onPositionChanged: mouse.accepted = false;
-        onPressAndHold: mouse.accepted = false;
-        onClicked: { console.log('POINT: ' + mouseX + ', ' + mouseY); mouse.accepted = false;}
-    }
+            anchors.top: screen.top;
+            anchors.left: screen.left;
+
+            text: activeRoomId
+
+            z: 1005
+        }
+
+        //console log the mouse click for dev purposes
+        MouseArea {
+            id: logPoint
+            anchors.fill: screen;
+            propagateComposedEvents: true
+            onPressed: mouse.accepted = false;
+            onDoubleClicked: mouse.accepted = false;
+            onReleased: mouse.accepted = false;
+            onPositionChanged: mouse.accepted = false;
+            onPressAndHold: mouse.accepted = false;
+            onClicked: { console.log('POINT: ' + mouseX + ', ' + mouseY); mouse.accepted = false;}
+        }
+}
 
     function init() {
         var gameState = storage.getPlayerState();
@@ -263,18 +288,17 @@ SceneBase {
     //TODO: save static numbers
     function updateRoomOffset() {
         //if player is in the right half of the screen && there is more of the room to show to the right....
-        var midPoint = gameScene.width/2;
+        var midPoint = screen.width/2;
         var playerX = mapFromItem(player).x;
-        if(playerX > midPoint){
-            if(viewPort.x > -(viewPort.width - gameScene.width)){
-                viewPort.x -= playerX - midPoint;
-            }
-        } else {
-            if(viewPort.x < 0){
-                viewPort.x -= playerX - midPoint;
-            }
+        var newOffset = roomPanel.offset.x - (playerX - midPoint);
 
+        if(newOffset > 0) {
+            newOffset = 0;
+        } else if(newOffset < -(activeRoom.width - screen.width)) {
+            newOffset = screen.width - activeRoom.width;
         }
+
+        roomPanel.offset.x = newOffset;
     }
 
 }

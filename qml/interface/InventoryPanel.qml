@@ -7,8 +7,8 @@ import "../common"
 Item {
     id: inventoryPanel
 
-    width: gameScene.width
-    height: gameScene.height
+    width: screen.width
+    height: screen.height
 
     x: 0
     y: 0 - height

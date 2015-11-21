@@ -20,8 +20,8 @@ EntityBase {
         source: "../../assets/player/player.png"
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
-        width: parent.width*parent.mediaScale
-        height: parent.height*parent.mediaScale
+        width: parent.width*parent.playerScale
+        height: parent.height*parent.playerScale
         z: 2000
     }
     */
