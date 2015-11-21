@@ -166,9 +166,6 @@ SceneBase {
     Item {
         id: screen
 
-        height: gameWindow.height
-        width: gameWindow.width
-
         anchors.fill: gameWindowAnchorItem
 
         ActiveInventoryFrame{
@@ -186,7 +183,7 @@ SceneBase {
         /* ------------- panel loader -------------- */
         Loader {
             id: panelLoader
-            anchors.fill: parent
+            anchors.fill: screen
             onLoaded: {
                 activePanel = item
             }
@@ -204,7 +201,7 @@ SceneBase {
             onPanelOpt4: panelOpt4();
             onPanelOpt5: panelOpt5();
             onPanelOptCancel: panelOptCancel();
-            onClose: {panelLoader.source = ''; screen.panelClosed();}
+            onClose: {panelLoader.source = ''; gameScene.panelClosed();}
         }
 
         //inventory panel visual helper (on top of the panels for save/load controls later)
@@ -249,7 +246,7 @@ SceneBase {
             onPressAndHold: mouse.accepted = false;
             onClicked: { console.log('POINT: ' + mouseX + ', ' + mouseY); mouse.accepted = false;}
         }
-}
+} /* --- end screen --- */
 
     function init() {
         var gameState = storage.getPlayerState();
