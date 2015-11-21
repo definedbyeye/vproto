@@ -20,7 +20,12 @@ EntityBase {
 
             switch(s.type){
                 case 'moveTo':
-                    state += 'StateChangeScript { script: activePlayer.waypoints = activeRoom.getWaypoints(mapToItem(activeRoom, activePlayer.colliderX, activePlayer.colliderY), mapToItem(activeRoom, '+s.x+','+s.y+'))} ';
+                    state += 'StateChangeScript { script: ';
+                state += 'var start = Qt.point(activePlayer.x, activePlayer.y);';
+                state += 'var end = Qt.point('+s.x+','+s.y+');';
+                state += 'var waypoints = activeRoom.getWaypoints(start, end);';
+                state += 'player.move(waypoints, end);}';
+//activePlayer.waypoints = activeRoom.getWaypoints(mapToItem(activeRoom, activePlayer.colliderX, activePlayer.colliderY), mapToItem(activeRoom, '+s.x+','+s.y+'))} ';
                     state += 'PropertyChanges { target: screen; ';
                     state += parseEvents(s.events);                    
                     state += '} ';                    

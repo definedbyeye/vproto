@@ -128,7 +128,6 @@ RoomBase {
                 frameHeight: 59
                 //to: {"freeze":1}
             }
-
         }
     }
 
@@ -143,8 +142,8 @@ RoomBase {
 
         onTap: {scripted.sequence = [
                     {name: 'getCloser', type: 'moveTo', x: 274, y: 270, events: [
-                            {on: 'onPlayerReachedTarget', to: 'firstLook'},
-                            {on: 'onPlayerStopped', to: 'firstLook'}
+                            {on: 'playerTargetReached', to: 'firstLook'},
+                            {on: 'playerTargetOutOfReach', to: 'firstLook'}
                         ]},
                     {name: 'firstLook', type: 'take',   inventoryId: 'emptyGlass', events: [
                             {on: 'onPanelOpt1', to: 'leaveIt'},
