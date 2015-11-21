@@ -13,15 +13,10 @@ RoomBase {
 
     // TODO: allow player to enter from multiple points
     property point defaultPlayerPoint: Qt.point(200,300);
-    property real defaultOffset: 0
+    property point defaultOffset: Qt.point(0,-40)
 
     property real minPerspective: .1
     property real maxPerspective: 1
-
-    onLoaded: {
-        roomScene.offset = defaultOffset
-        roomScene.anchors.bottom = gameScene.gameWindowAnchorItem.bottom;
-    }
 
     PlayerSkin {
         id: playerSkin
@@ -41,7 +36,7 @@ RoomBase {
         z: 20
         height: 214
         width: parent.width*2
-        x: roomScene.offset*-.15
+        x: roomPanel.offset.x*-.15
         y: parent.height - 250
         source: "../../assets/background/clouds.png"
         fillMode: Image.TileHorizontally
@@ -68,7 +63,7 @@ RoomBase {
         z: 60
         height: 51
         width: parent.width*4
-        x: roomScene.offset*.5
+        x: roomPanel.offset.x*.5
         source: "../../assets/background/post.png"
         fillMode: Image.TileHorizontally
         anchors.bottom: parent.bottom

@@ -21,7 +21,7 @@ EntityBase {
             switch(s.type){
                 case 'moveTo':
                     state += 'StateChangeScript { script: activePlayer.waypoints = activeRoom.getWaypoints(mapToItem(activeRoom, activePlayer.colliderX, activePlayer.colliderY), mapToItem(activeRoom, '+s.x+','+s.y+'))} ';
-                    state += 'PropertyChanges { target: gameScene; ';
+                    state += 'PropertyChanges { target: screen; ';
                     state += parseEvents(s.events);                    
                     state += '} ';                    
                     break;
@@ -31,7 +31,7 @@ EntityBase {
                         panelLoader.source = "../interface/MessagePanel.qml";
                         activePanel.message = "'+s.message+'";
                     }} ';
-                    state += 'PropertyChanges { target: gameScene; ';
+                    state += 'PropertyChanges { target: screen; ';
                     state += parseEvents(s.events);                    
                     state += '} ';
                     break;
@@ -40,7 +40,7 @@ EntityBase {
                         panelLoader.source = "../interface/TakePanel.qml";
                         activePanel.inventoryId = "'+s.inventoryId+'";
                     }} ';
-                    state += 'PropertyChanges { target: gameScene; ';
+                    state += 'PropertyChanges { target: screen; ';
                     state += parseEvents(s.events);
                     state += '} ';
                     break;
@@ -52,7 +52,7 @@ EntityBase {
                         activePanel.profile = "'+s.profile+'"; '
                         +parseDialogOpts(s.events)+'
                     }} ';
-                    state += 'PropertyChanges { target: gameScene; ';
+                    state += 'PropertyChanges { target: screen; ';
                     state += parseEvents(s.events);                    
                     state += '} ';                    
                     break;

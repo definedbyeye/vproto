@@ -5,6 +5,11 @@ import "../common"
 SceneBase {
     id:creditsScene
 
+    height: 320
+    width: 480
+
+    anchors.centerIn: parent.gameWindowAnchorItem
+
     // background
     Rectangle {
         anchors.fill: parent.gameWindowAnchorItem

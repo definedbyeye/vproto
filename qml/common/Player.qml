@@ -9,7 +9,6 @@ EntityBase {
     width: 1
     height: 1
 
-    property real mediaScale: 1
     property int speed: 150
     property string direction: ""
 
@@ -21,7 +20,6 @@ EntityBase {
     signal targetOutOfReach
 
     function move(waypoints, end) {
-        console.log('player state: x,y '+x+','+y+' w/h '+width+','+height)
         path.stop();
         target = end;
         path.waypoints = waypoints;
@@ -39,9 +37,6 @@ EntityBase {
         id: path
           velocity: 100
           rotationAnimationEnabled: false
-          onWaypointsChanged: {
-              console.log('waypoints are now: '+waypoints);
-          }
 
           onWaypointReached: {
               player.waypointReached();
@@ -57,5 +52,21 @@ EntityBase {
               }
           }
       }
+
+    /*
+        Behavior on y {
+            SmoothedAnimation {
+                easing.type: Easing.bezierCurve
+                duration: 100
+            }
+        }
+
+        Behavior on x {
+            SmoothedAnimation {
+                easing.type: Easing.bezierCurve
+                duration: 100
+            }
+        }
+*/
 }
 

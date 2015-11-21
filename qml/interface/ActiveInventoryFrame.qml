@@ -17,9 +17,9 @@ Item {
 
     //bottom middle
     //TODO: test top right
-    //x: gameScene.width/2 - 25
-    //y: gameScene.height - 50
-    x: inventoryId ? gameScene.width - 50 : -60
+    //x: screen.width/2 - 25
+    //y: screen.height - 50
+    x: inventoryId ? screen.width - 50 : -60
     y: inventoryId ? 0 : -60
 
     width: 50;
@@ -72,14 +72,14 @@ Item {
         }
 
         onPressed: {
-            roomScene.dragActiveInventory.inventoryId = inventoryId;
-            roomScene.dragActiveInventory.visible = true;
+            roomPanel.dragActiveInventory.inventoryId = inventoryId;
+            roomPanel.dragActiveInventory.visible = true;
             activeInventory.dragging = true;
         }
         onReleased: {
             activeInventory.dragging = false;
-            roomScene.dragActiveInventory.dropped();
-            roomScene.dragActiveInventory.visible = false;
+            roomPanel.dragActiveInventory.dropped();
+            roomPanel.dragActiveInventory.visible = false;
             reset();
         }
         onPositionChanged: follow(mouse);
@@ -89,8 +89,8 @@ Item {
             activeInventory.x = mouse.x - activeInventory.width/2;
             activeInventory.y = mouse.y - activeInventory.height/2;
 
-            var drag = roomScene.dragActiveInventory;
-            var vp = mapToItem(roomScene, activeInventory.x, activeInventory.y);
+            var drag = roomPanel.dragActiveInventory;
+            var vp = mapToItem(roomPanel, activeInventory.x, activeInventory.y);
             drag.x = vp.x + 5;
             drag.y = vp.y + activeInventory.height - 5;
         }
@@ -99,8 +99,8 @@ Item {
             activeInventory.x = 0;
             activeInventory.y = 0;
 
-            var drag = roomScene.dragActiveInventory;
-            var vp = mapToItem(roomScene, 5, 5);
+            var drag = roomPanel.dragActiveInventory;
+            var vp = mapToItem(roomPanel, 5, 5);
             drag.x = vp.x;
             drag.y = vp.y + activeInventory.height - 5;
 

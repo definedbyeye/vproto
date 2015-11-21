@@ -5,12 +5,17 @@ import "../common"
 SceneBase {
     id: menuScene
 
+    height: 320
+    width: 480
+
     signal newGamePressed
     signal continueGamePressed
     signal creditsPressed
 
     MultiResolutionImage {
         source: "../../assets/background/bg_loading_screen.jpg"
+        anchors.fill: parent
+        fillMode: Image.PreserveAspectCrop
     }
 
     // the game name

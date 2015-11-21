@@ -7,12 +7,12 @@ import '../../assets/scripts/sat.js' as Sat
 Item {
   id: roomBase  
 
-  property real dragMinX: -(roomBase.width-gameScene.width)
+  property real dragMinX: -(roomBase.width-screen.width)
   property real dragMaxX: 0
   property real dragMinY: 0
-  property real dragMaxY: roomBase.height-gameScene.height
+  property real dragMaxY: roomBase.height-screen.height
 
-  property real defaultOffset: 0
+  property point defaultOffset: Qt.point(0,0)
 
   property point defaultPlayerPoint: Qt.point(0,0)
   property real minPerspective: 1

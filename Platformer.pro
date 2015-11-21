@@ -38,5 +38,6 @@ DISTFILES += \
     qml/interface/DialogPanel.qml \
     qml/common/Scripted.qml \
     qml/interface/TakePanel.qml \
-    qml/common/Player.qml
+    qml/common/Player.qml \
+    qml/interface/MessagePanel.qml
 
