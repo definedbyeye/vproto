@@ -21,8 +21,8 @@ Item {
   property string goToRoomId: ''
   property string fromAreaId: ''
 
-  property variant nodes: []    //multi array [x][y] blocked=0
-  property variant graph: null  //nodes translated to astar graph obj
+  property variant grid: []    //multi array [x][y] blocked=0
+  property variant graph: null  //grid translated to astar graph obj
   property int stepSize: 10
 
   // obstructions are pushed here as they are created.
@@ -31,12 +31,12 @@ Item {
   property var obstructions: []
 
   //has room been initialized before
-  //todo: not sure if room retains nodes, graphs, etc on reload
+  //todo: not sure if room retains grid, graphs, etc on reload
   property bool init: false
 
   signal loaded
   onLoaded: {
-      //todo: save generated nodes and graph to db
+      //todo: save generated grid and graph to db
       if(!init){
         initGraph();
         init = true;
@@ -49,39 +49,52 @@ Item {
   }
 
   function initGraph(){
-      var row = [],
-          blocked = false,
-          stepX = 0,
-          stepY = 0;
-      var blocks = [];
+      var cachedGrid = storage.loadRoomGrid(activeRoomId, obstructions);
 
-      convertObstructionsToSAT();
+      //load grid from storage, else generate and store
+      if(cachedGrid.length){
 
-      while(stepY <= height) {
-          while(stepX <= width) {
-            row.push(isNodeBlocked(Qt.point(stepX, stepY), stepSize) ? 0 : 1);
-              if(!isNodeBlocked(Qt.point(stepX, stepY), stepSize) ? 0 : 1){
-                  blocks.push(Qt.point(stepX,stepY));
-              };
-            stepX += stepSize;
+          grid = cachedGrid;
+
+      } else {
+
+          var row = [],
+              blocked = false,
+              stepX = 0,
+              stepY = 0;
+          var blocks = [];
+
+          var satObstructions = convertObstructionsToSAT(obstructions);
+
+          while(stepY <= height) {
+              while(stepX <= width) {
+                row.push(isNodeBlocked(Qt.point(stepX, stepY), stepSize, satObstructions) ? 0 : 1);
+                  if(!isNodeBlocked(Qt.point(stepX, stepY), stepSize, satObstructions) ? 0 : 1){
+                      blocks.push(Qt.point(stepX,stepY));
+                  };
+                stepX += stepSize;
+              }
+              grid.push(row);
+              row = [];
+              stepX = 0;
+              stepY += stepSize;
           }
-          nodes.push(row);
-          row = [];
-          stepX = 0;
-          stepY += stepSize;
-      }
 
-      drawBlocks(blocks, 'orange');
-      graph = new Astar.Graph(nodes);
+          drawBlocks(blocks, 'orange');
+
+          storage.saveRoomGrid(activeRoomId, obstructions, grid);
+     }
+
+      graph = new Astar.Graph(grid);
   }
 
-  function convertObstructionsToSAT(){
+  function convertObstructionsToSAT(obstructions){
       var i, //iterate obstructions
           j, //iterate vertices
           v, //current obstruction's array of SAT vectors
           o; //current obstruction
 
-      var obstructionsSAT = [];
+      var satObstructions = [];
 
       if(obstructions.length){
           for(i=0; i < obstructions.length; i++){
@@ -90,15 +103,15 @@ Item {
               for(j=0; j < o.vertices.length; j++){
                   v.push(new Sat.Vector(o.vertices[j].x,o.vertices[j].y));
               }
-              obstructionsSAT.push(new Sat.Polygon(new Sat.Vector(o.x, o.y), v));
+              satObstructions.push(new Sat.Polygon(new Sat.Vector(o.x, o.y), v));
           }
       }
 
-      obstructions = obstructionsSAT;
+      return satObstructions;
   }
 
   //tests if the node overlaps any of our obstruction polygons
-  function isNodeBlocked(node, stepSize){
+  function isNodeBlocked(node, stepSize, obstructions){
       if(obstructions.length > 0){
           var block = new Sat.Box(new Sat.Vector(node.x,node.y), stepSize, stepSize).toPolygon();
           for(var i = 0; i < obstructions.length; i++){
@@ -111,7 +124,7 @@ Item {
   }
 
   //http://playtechs.blogspot.ca/2007/03/raytracing-on-grid.html
-  //test line of site across nodes
+  //test line of site across grid
   function lineOfSite(nodeA, nodeB) {
     var x0 = nodeA.x;
     var y0 = nodeA.y;
@@ -161,7 +174,7 @@ Item {
 
     for (; n > 0; --n) {
 
-        if (nodes[x][y] === 0) {
+        if (grid[x][y] === 0) {
             return false;
         }
 
@@ -182,7 +195,7 @@ Item {
   function getWaypoints(start, end) {
     var waypoints = [start,end];
 
-    graph = new Astar.Graph(nodes); //do not remove
+    graph = new Astar.Graph(grid); //do not remove
 
     var startNode = graph.grid[Math.floor(start.y/stepSize)][Math.floor(start.x/stepSize)];
     var endNode = graph.grid[Math.floor(end.y/stepSize)][Math.floor(end.x/stepSize)];

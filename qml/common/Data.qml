@@ -2,6 +2,8 @@ import QtQuick 2.0
 import VPlay 2.0
 import QtQuick.LocalStorage 2.0
 
+//Database is located at: C:\Users\Megan\AppData\Local\Platformer\QML\OfflineStorage\Databases
+
 Item {
     id: storage
 
@@ -27,8 +29,8 @@ Item {
             tx.executeSql('CREATE TABLE IF NOT EXISTS InteractStates(saveId INTEGER, interactId TEXT, state TEXT)');
             tx.executeSql('CREATE TABLE IF NOT EXISTS InventoryStates(saveId INTEGER, inventoryId TEXT, state TEXT)');
             tx.executeSql('CREATE TABLE IF NOT EXISTS EventStates(saveId INTEGER, eventId TEXT, state TEXT)');
-
             tx.executeSql('CREATE TABLE IF NOT EXISTS InventoryItems(inventoryId TEXT, name TEXT, description TEXT)');
+            tx.executeSql('CREATE TABLE IF NOT EXISTS RoomGrids(roomId TEXT, obstructions TEXT, grid TEXT)');
         });
     }
 
@@ -265,6 +267,47 @@ Item {
 
         });
 
+    }
+
+    function minifyVertices(obstructions) {
+        var i, j, verts = [];
+
+        for(i=0; i < obstructions.length; i++) {
+            verts.push(obstructions[i].vertices);
+        }
+
+        return Qt.md5(verts);
+    }
+
+    function saveRoomGrid(roomId, obstructions, grid) {
+        var db = openDb();
+        var qry = '';
+
+        if(loadRoomGrid(roomId, obstructions).length) {
+            qry = 'UPDATE RoomGrids SET roomId = "'+roomId+'", obstructions = "'+minifyVertices(obstructions)+'", grid = "'+JSON.stringify(grid)+'")';
+        } else {
+            qry = 'INSERT INTO RoomGrids (roomId, obstructions, grid) VALUES ("'+roomId+'","'+minifyVertices(obstructions)+'","'+JSON.stringify(grid)+'")';
+        }
+
+        db.transaction(function(tx) {
+            console.log('saving room grid! '+qry);
+            tx.executeSql(qry);
+        });
+
+    }
+
+    function loadRoomGrid(roomId, obstructions) {
+        var grid = [];
+        var db = openDb();
+
+        db.transaction(function(tx) {
+            var result = tx.executeSql('SELECT * FROM RoomGrids')// WHERE inventoryId = "'+inventoryId+'"');
+            if(result.rows.length){
+                grid = JSON.parse(result.rows.item(0).grid);
+            }
+        });
+
+        return grid;
     }
 
 }
