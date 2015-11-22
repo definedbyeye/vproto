@@ -112,6 +112,7 @@ EntityBase {
         }
     }
 
+    //TODO: move this to a once-included utility js
 
     // Copyright 2000 softSurfer, 2012 Dan Sunday
     // This code may be freely used and modified for any purpose
