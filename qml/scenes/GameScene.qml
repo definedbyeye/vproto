@@ -93,8 +93,16 @@ SceneBase {
             id: player
             z: 200
 
-            onTargetReached: storage.savePlayerPoint(Qt.point(target.x, target.y));
-            onTargetOutOfReach: storage.savePlayerPoint(Qt.point(target.x, target.y));
+            onTargetReached: {
+                storage.savePlayerPoint(Qt.point(target.x, target.y));
+                gameScene.playerTargetReached();
+            }
+
+            onTargetOutOfReach: {
+                storage.savePlayerPoint(Qt.point(target.x, target.y));
+                gameScene.playerTargetOutOfReach();
+            }
+
             onXChanged: updateRoomOffset();
 
             Component.onCompleted: {
@@ -158,12 +166,8 @@ SceneBase {
 
     } // --- end of roomPanel -------------------
 
-    Rectangle {
-        color: 'blue'
-        width: 20
-        height: 20
-        x: 0
-        y: gameScene.height
+    Scripted {
+        id: scripted
     }
 
     Item {
@@ -177,10 +181,6 @@ SceneBase {
 
         InventoryPanel {
             id: inventoryPanel
-        }
-
-        Scripted {
-            id: scripted
         }
 
         /* ------------- panel loader -------------- */

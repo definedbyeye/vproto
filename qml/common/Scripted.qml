@@ -20,12 +20,12 @@ EntityBase {
 
             switch(s.type){
                 case 'moveTo':
-                    state += 'StateChangeScript { script: ';
+                    state += 'StateChangeScript { script: {';
                     state += 'var start = Qt.point(roomPanel.playerThing.x, roomPanel.playerThing.y);';
                     state += 'var end = Qt.point('+s.x+','+s.y+');';
                     state += 'var waypoints = activeRoom.getWaypoints(start, end);';
-                    state += 'roomPanel.playerThing.move(waypoints, end);}';
-                    state += 'PropertyChanges { target: screen; ';
+                    state += 'roomPanel.playerThing.move(waypoints, end);}}';
+                    state += 'PropertyChanges { target: gameScene; ';
                     state += parseEvents(s.events);                    
                     state += '} ';                    
                     break;
@@ -35,7 +35,7 @@ EntityBase {
                         panelLoader.source = "../interface/MessagePanel.qml";
                         activePanel.message = "'+s.message+'";
                     }} ';
-                    state += 'PropertyChanges { target: screen; ';
+                    state += 'PropertyChanges { target: gameScene; ';
                     state += parseEvents(s.events);                    
                     state += '} ';
                     break;
@@ -44,7 +44,7 @@ EntityBase {
                         panelLoader.source = "../interface/TakePanel.qml";
                         activePanel.inventoryId = "'+s.inventoryId+'";
                     }} ';
-                    state += 'PropertyChanges { target: screen; ';
+                    state += 'PropertyChanges { target: gameScene; ';
                     state += parseEvents(s.events);
                     state += '} ';
                     break;
@@ -56,7 +56,7 @@ EntityBase {
                         activePanel.profile = "'+s.profile+'"; '
                         +parseDialogOpts(s.events)+'
                     }} ';
-                    state += 'PropertyChanges { target: screen; ';
+                    state += 'PropertyChanges { target: gameScene; ';
                     state += parseEvents(s.events);                    
                     state += '} ';                    
                     break;
