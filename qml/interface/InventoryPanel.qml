@@ -2,6 +2,7 @@ import VPlay 2.0
 import QtQuick 2.4
 import QtQuick.Layouts 1.1
 import QtQuick.Controls 1.3
+import QtQuick.Controls.Styles 1.2
 import "../common"
 
 Item {
@@ -14,15 +15,7 @@ Item {
     y: 0 - height
     z: 1001
 
-    property string descriptionText: ''    
-
-    MouseArea {
-        anchors.fill: parent
-        onReleased: hide()
-    }
-
-    PropertyAnimation { id: showPanel; target: inventoryPanel; property: "y"; to: 0; duration: 700; easing.type: Easing.InOutCubic; }
-    PropertyAnimation { id: hidePanel; target: inventoryPanel; property: "y"; to: 0-height; duration: 1500; easing.type: Easing.OutBack; }
+    property string descriptionText: ''
 
     signal hide
     signal show
@@ -38,53 +31,203 @@ Item {
         showPanel.running = true;
     }
 
+    PropertyAnimation { id: showPanel; target: inventoryPanel; property: "y"; to: 0; duration: 700; easing.type: Easing.InOutCubic; }
+    PropertyAnimation { id: hidePanel; target: inventoryPanel; property: "y"; to: 0-height; duration: 1500; easing.type: Easing.OutBack; }
+
     //TODO: fix the background here so that it fills the screen and only the frame animates in
 
+    //click outside the panel to close
+    MouseArea {
+        anchors.fill: parent
+        onReleased: hide()
+    }
+
     Rectangle {
+        id: menuPanel
         color: "#cccccc"
         anchors.centerIn: parent
         width: parent.width - 100
         height: parent.height - 100
 
-        EntityManager {
-            id: inventoryManager
-            entityContainer: inventoryGrid
-            dynamicCreationEntityList: []
-        }
+        state: "viewInventory"
 
-        Text {
-            text: "Inventory Window"
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.leftMargin: 10
-            anchors.topMargin: 10
-        }
+        states: [
+            State {
+                   name: "viewInventory";
+                   PropertyChanges { target: viewInventory; visible: true }
+                },
+            State {
+                   name: "viewSavedGames";
+                   PropertyChanges { target: viewSavedGames; visible: true }
+                },
+            State {
+                   name: "viewHelp";
+                   PropertyChanges { target: viewHelp; visible: true }
+                }
+        ]
 
-        Text {
-            id: description
-            text: inventoryPanel.descriptionText
+        Button {
+            id: viewInventoryButton
+            width: 75
             height: 20
-            anchors.bottom: parent.bottom
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.margins: 10
+            anchors.right: menuPanel.right
+            anchors.top: menuPanel.top
+            anchors.topMargin: 30
+            anchors.rightMargin: 10
+            text: 'Inventory'
+            onClicked: {menuPanel.state = "viewInventory"}
+
+            style: ButtonStyle {
+                  label: Text {
+                    font.pointSize: 10
+                    text: control.text
+                  }
+             }
         }
 
-        ScrollViewVPlay {
-            id: scrollView
-            anchors.fill: parent
-            anchors.topMargin: 30
-            anchors.leftMargin: 20
-            anchors.rightMargin: 100
-            anchors.bottomMargin: 40
+        Button {
+            id: viewSavedGamesButton
+            width: 75
+            height: 20
+            anchors.right: menuPanel.right
+            anchors.top: menuPanel.top
+            anchors.topMargin: 60
+            anchors.rightMargin: 10
+            text: 'Saves'
+            onClicked: {menuPanel.state = "viewSavedGames"}
+            style: ButtonStyle {
+                  label: Text {
+                    font.pointSize: 10
+                    text: control.text
+                  }
+             }
+        }
 
-            flickableItem.interactive: true
-            frameVisible: true
-            flickableItem.flickableDirection: Flickable.VerticalFlick                    
+        Button {
+            id: viewHelpButton
+            width: 75
+            height: 20
+            anchors.right: menuPanel.right
+            anchors.top: menuPanel.top
+            anchors.topMargin: 90
+            anchors.rightMargin: 10
+            text: 'Help'
+            onClicked: {menuPanel.state = "viewHelp"}
+            style: ButtonStyle {
+                  label: Text {
+                    font.pointSize: 10
+                    text: control.text
+                  }
+             }
+        }
 
-            GridLayout {
-                id: inventoryGrid                                
-                width: scrollView.width-10
+        Button {
+            id: exitButton
+            width: 75
+            height: 20
+            anchors.right: menuPanel.right
+            anchors.top: menuPanel.top
+            anchors.topMargin: 120
+            anchors.rightMargin: 10
+            text: 'Quit Game'
+            onClicked: {nativeUtils.displayMessageBox(qsTr("Really quit the game?"), "", 2);}
+            style: ButtonStyle {
+                  label: Text {
+                    font.pointSize: 10
+                    text: control.text
+                  }
+             }
+        }
+
+        Item {
+            id: viewInventory
+            anchors.fill: menuPanel
+            visible: false
+
+            EntityManager {
+                id: inventoryManager
+                entityContainer: inventoryGrid
+                dynamicCreationEntityList: []
+            }
+
+            Text {
+                text: "Inventory Window"
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+                anchors.topMargin: 10
+            }
+
+            Text {
+                id: description
+                text: inventoryPanel.descriptionText
+                height: 20
+                anchors.bottom: parent.bottom
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.margins: 10
+            }
+
+            ScrollViewVPlay {
+                id: scrollView
+                anchors.fill: parent
+                anchors.topMargin: 30
+                anchors.leftMargin: 20
+                anchors.rightMargin: 100
+                anchors.bottomMargin: 40
+
+                flickableItem.interactive: true
+                frameVisible: true
+                flickableItem.flickableDirection: Flickable.VerticalFlick
+
+                GridLayout {
+                    id: inventoryGrid
+                    width: scrollView.width-10
+                }
+            }
+        }
+
+        Item {
+            id: viewSavedGames
+            anchors.fill: menuPanel
+            visible: false
+
+            Text {
+                text: "Ooh, saved games!"
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+                anchors.topMargin: 10
+            }
+
+            ScrollViewVPlay {
+                id: scrollSavedGames
+                anchors.fill: parent
+                anchors.topMargin: 30
+                anchors.leftMargin: 20
+                anchors.rightMargin: 100
+                anchors.bottomMargin: 40
+
+                flickableItem.interactive: true
+                frameVisible: true
+                flickableItem.flickableDirection: Flickable.VerticalFlick
+
+                ListView{
+
+                }
+            }
+        }
+
+        Item {
+            id: viewHelp
+            anchors.fill: menuPanel
+            visible: false
+            Text {
+                text: "Help Help!"
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+                anchors.topMargin: 10
             }
         }
     }

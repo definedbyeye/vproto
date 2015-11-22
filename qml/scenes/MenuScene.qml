@@ -71,8 +71,7 @@ SceneBase {
     Connections {
         target: nativeUtils
         onMessageBoxFinished: {
-            // only quit, if the activeScene is menuScene - the messageBox might also get opened from other scenes in your code
-            if(accepted && window.activeScene === menuScene)
+            if(accepted)
                 Qt.quit()
         }
     }
