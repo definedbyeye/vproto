@@ -289,8 +289,7 @@ Item {
             qry = 'INSERT INTO RoomGrids (roomId, obstructions, grid) VALUES ("'+roomId+'","'+minifyVertices(obstructions)+'","'+JSON.stringify(grid)+'")';
         }
 
-        db.transaction(function(tx) {
-            console.log('saving room grid! '+qry);
+        db.transaction(function(tx) {            
             tx.executeSql(qry);
         });
 
@@ -298,10 +297,10 @@ Item {
 
     function loadRoomGrid(roomId, obstructions) {
         var grid = [];
-        var db = openDb();
+        var db = openDb();        
 
         db.transaction(function(tx) {
-            var result = tx.executeSql('SELECT * FROM RoomGrids')// WHERE inventoryId = "'+inventoryId+'"');
+            var result = tx.executeSql('SELECT * FROM RoomGrids WHERE roomId = "'+roomId+'" AND obstructions = "'+minifyVertices(obstructions)+'"');
             if(result.rows.length){
                 grid = JSON.parse(result.rows.item(0).grid);
             }

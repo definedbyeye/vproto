@@ -12,14 +12,11 @@ Item {
   property real dragMinY: 0
   property real dragMaxY: roomBase.height-screen.height
 
-  property point defaultOffset: Qt.point(0,0)
-
-  property point defaultPlayerPoint: Qt.point(0,0)
-  property real minPerspective: 1
-  property real maxPerspective: 1
-
-  property string goToRoomId: ''
-  property string fromAreaId: ''
+  // --- rooms will not override these
+  //property point defaultOffset: Qt.point(0,0)
+  //property var entrances: {'default': Qt.point(0,0)}
+  //property real minPerspective: 1
+  //property real maxPerspective: 1
 
   property variant grid: []    //multi array [x][y] blocked=0
   property variant graph: null  //grid translated to astar graph obj
@@ -30,23 +27,36 @@ Item {
   // todo: cache to db
   property var obstructions: []
 
-  //has room been initialized before
-  //todo: not sure if room retains grid, graphs, etc on reload
-  property bool init: false
-
   signal loaded
   onLoaded: {
+      console.log('ROOM '+parent.id+' LOADED.  Init\'ed? ' + init);
       //todo: save generated grid and graph to db
-      if(!init){
         initGraph();
-        init = true;
-      }
   }
 
-  function placePlayer(player, fromAreaId) {
-      player.x = defaultPlayerPoint.x;
-      player.y = defaultPlayerPoint.y;
+  PlayerSkin {
+      id: playerSkin
+      z: 50
   }
+
+  // ------------------- //
+
+
+  function placePlayer(player, entrance) {
+      var point = Qt.point(0,0);
+
+      if(entrances[entrance]) {
+          point = entrances[entrance];
+      } else if(entrances.default) {
+          point = entrances.default;
+      }
+
+      console.log('placing player at '+point.x+', '+point.y);
+
+      player.x = point.x;
+      player.y = point.y;
+  }
+
 
   function initGraph(){
       var cachedGrid = storage.loadRoomGrid(activeRoomId, obstructions);

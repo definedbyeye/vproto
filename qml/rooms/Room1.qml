@@ -9,19 +9,21 @@ RoomBase {
     height: 360
     width: 1140
 
-    property alias playerSkin: playerSkin
+    //property alias playerSkin: playerSkin
 
-    // TODO: allow player to enter from multiple points
-    property point defaultPlayerPoint: Qt.point(200,300);
+    // TODO: allow player to enter from multiple points    
+    property var entrances: {'default': Qt.point(200,300)}
     property point defaultOffset: Qt.point(0,-40)
 
     property real minPerspective: .1
     property real maxPerspective: 1
 
+    /*
     PlayerSkin {
         id: playerSkin
         z: 50
     }
+    */
 
     // background
     MultiResolutionImage {
@@ -267,9 +269,8 @@ RoomBase {
             Qt.point(245, 236) // top right
         ]
 
-        onEntered: {
-            goToRoomId = 'room2'
-            fromAreaId= 'leftArea'
+        onEntered: {            
+            gameScene.goToRoom('room2', 'right');
         }
     }
 

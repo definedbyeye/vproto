@@ -45,6 +45,12 @@ SceneBase {
     onActivePlayerIdChanged: storage.savePlayerId(activePlayerId);
     onActiveRoomIdChanged: storage.saveRoomId(activeRoomId);
 
+    signal goToRoom(string roomId, string entrance)
+    onGoToRoom: {
+        player.stop();
+        setRoom(roomId, entrance);
+    }
+
     // roomPanel contains the full room.  gamescene only shows part of it.
     // todo: flip the two names
     Item {
@@ -100,23 +106,20 @@ SceneBase {
         Loader {
             id: roomLoader
             source: ''
-            property string fromAreaId: ''
+            property string entrance: 'default'
             onLoaded: {
                 activeRoom = item;
                 activeRoom.loaded();
-                //todo: replace with a "setplayer" function accounting for areaid
-                player.x = activeRoom.defaultPlayerPoint.x;
-                player.y = activeRoom.defaultPlayerPoint.y;
                 roomPanel.offset.x = activeRoom.defaultOffset.x
                 roomPanel.offset.y = activeRoom.defaultOffset.y
+                console.log('sending player to entrance: '+entrance);
+                console.log('active rooms default entrance is: '+activeRoom.entrances.default);
+                activeRoom.placePlayer(player, entrance);
             }
         }
         Connections {
             // only connect if a level is loaded, to prevent errors
             target: activeRoom !== undefined ? activeRoom : null
-            onGoToRoomIdChanged: {
-                setRoom(target.goToRoomId, target.fromAreaId);
-            }
         }
 
         // Pressing MouseArea.dragFromFrame inits this
@@ -264,13 +267,14 @@ SceneBase {
         }
     }
 
-    function setRoom(toRoomId, fromAreaId) {
+
+    function setRoom(roomId, entrance) {
 
         //allow new room to set the player's position based on the old room
         //TODO: fromInteractId
         //roomLoader.fromInteractId = activeRoomId;
-        activeRoomId = toRoomId;
-        roomLoader.fromAreaId = fromAreaId || '';
+        activeRoomId = roomId;
+        roomLoader.entrance = entrance || 'default';
         roomLoader.source = "../rooms/" + activeRoomId.charAt(0).toUpperCase() + activeRoomId.slice(1) + '.qml';
 
     }

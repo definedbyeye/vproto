@@ -19,6 +19,11 @@ EntityBase {
     signal targetReached
     signal targetOutOfReach
 
+    signal stop
+    signal collision
+
+    onStop: path.stop();
+
     function move(waypoints, end) {
         path.stop();
         target = end;
@@ -27,8 +32,6 @@ EntityBase {
     }
 
     Rectangle {
-        width: 10
-        height: 10
         anchors.fill: parent;
         color: "red"
     }
@@ -53,20 +56,19 @@ EntityBase {
           }
       }
 
-    /*
-        Behavior on y {
-            SmoothedAnimation {
-                easing.type: Easing.bezierCurve
-                duration: 100
-            }
-        }
+    BoxCollider {
+        id: playerCollider
 
-        Behavior on x {
-            SmoothedAnimation {
-                easing.type: Easing.bezierCurve
-                duration: 100
-            }
+        anchors.fill: parent
+        bodyType: Body.Dynamic
+        collisionTestingOnlyMode: true
+
+        categories: Box.Category1   // player
+        collidesWith: Box.Category3 // area
+
+        fixture.onBeginContact: {
+            player.collision();
         }
-*/
+    }
 }
 

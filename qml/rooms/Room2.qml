@@ -9,31 +9,23 @@ RoomBase {
     height: 360
     width: 1140
 
-    //state machine this so player can enter from multiple points
-    property point defaultPlayerPoint: Qt.point(900,120);
+    property alias playerSkin: playerSkin
 
+    //define all entrance points
+    property var entrances: {'default': Qt.point(200,300), 'right':Qt.point(900,300)}
     property point defaultOffset: Qt.point(-(room2.width - screen.width), 0);
 
-    Component.onCompleted: {
-        roomPanel.anchors.bottom = screen.gameWindowAnchorItem.bottom;
-        roomPanel.offset = defaultOffset
-        /*
-        roomPanel.anchors.top = undefined;
-        roomPanel.anchors.left = undefined;
-        roomPanel.anchors.bottom = screen.gameWindowAnchorItem.bottom;
-        roomPanel.anchors.right = screen.gameWindowAnchorItem.right;
-        */
+    property real minPerspective: .1
+    property real maxPerspective: 1
+
+    PlayerSkin {
+        id: playerSkin
+        z: 50
     }
 
     MultiResolutionImage {
         source: "../../assets/background/bg_testing_tables.png"
     }
-
-    function placePlayer(player, fromAreaId) {
-        player.x = defaultPlayerPoint.x;
-        player.y = defaultPlayerPoint.y;
-    }
-
 
     Loader {
         id: glass
