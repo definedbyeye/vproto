@@ -9,21 +9,12 @@ RoomBase {
     height: 360
     width: 1140
 
-    //property alias playerSkin: playerSkin
-
     // TODO: allow player to enter from multiple points    
     property var entrances: {'default': Qt.point(200,300)}
     property point defaultOffset: Qt.point(0,-40)
 
     property real minPerspective: .1
     property real maxPerspective: 1
-
-    /*
-    PlayerSkin {
-        id: playerSkin
-        z: 50
-    }
-    */
 
     // background
     MultiResolutionImage {
@@ -60,7 +51,6 @@ RoomBase {
         y: 210
         source: "../../assets/background/table.png"
     } 
-
     MultiResolutionImage {
         z: 60
         height: 51
@@ -144,8 +134,8 @@ RoomBase {
 
         onTap: {scripted.sequence = [
                     {name: 'getCloser', type: 'moveTo', x: 274, y: 270, events: [
-                            {on: 'playerTargetReached', to: 'firstLook'},
-                            {on: 'playerTargetOutOfReach', to: 'firstLook'}
+                            {on: 'onPlayerTargetReached', to: 'firstLook'},
+                            {on: 'onPlayerTargetOutOfReach', to: 'firstLook'}
                         ]},
                     {name: 'firstLook', type: 'take',   inventoryId: 'emptyGlass', events: [
                             {on: 'onPanelOpt1', to: 'leaveIt'},
