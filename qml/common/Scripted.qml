@@ -21,11 +21,10 @@ EntityBase {
             switch(s.type){
                 case 'moveTo':
                     state += 'StateChangeScript { script: ';
-                state += 'var start = Qt.point(activePlayer.x, activePlayer.y);';
-                state += 'var end = Qt.point('+s.x+','+s.y+');';
-                state += 'var waypoints = activeRoom.getWaypoints(start, end);';
-                state += 'player.move(waypoints, end);}';
-//activePlayer.waypoints = activeRoom.getWaypoints(mapToItem(activeRoom, activePlayer.colliderX, activePlayer.colliderY), mapToItem(activeRoom, '+s.x+','+s.y+'))} ';
+                    state += 'var start = Qt.point(roomPanel.playerThing.x, roomPanel.playerThing.y);';
+                    state += 'var end = Qt.point('+s.x+','+s.y+');';
+                    state += 'var waypoints = activeRoom.getWaypoints(start, end);';
+                    state += 'roomPanel.playerThing.move(waypoints, end);}';
                     state += 'PropertyChanges { target: screen; ';
                     state += parseEvents(s.events);                    
                     state += '} ';                    
